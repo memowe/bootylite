@@ -26,7 +26,6 @@ has articles => sub {
     return \@articles;
 };
 
-# get article by url
 sub get_article {
     my ($self, $url) = @_;
 
@@ -41,10 +40,8 @@ sub get_article {
     return;
 }
 
-# refresh articles
 sub refresh { delete shift->{articles} }
 
-# get the whole tag cloud as a hashref: tagname => amount
 sub get_tags {
     my $self = shift;
 
@@ -57,7 +54,6 @@ sub get_tags {
     return \%amount;
 }
 
-# get all articles for a tag
 sub get_articles_by_tag {
     my $self    = shift;
     my $tag     = lc shift;

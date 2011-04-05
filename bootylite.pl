@@ -28,7 +28,7 @@ get '/' => sub {
 } => 'index';
 
 get '/tag/:tag' => sub {
-    # TODO
+    die 'TODO';
 } => 'tag';
 
 app->start;
