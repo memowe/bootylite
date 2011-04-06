@@ -1,7 +1,7 @@
 Bootylite - a simple file system based blog
 ===========================================
 
-> **No trackbacks, no comments, no admin interface, no deps but Mojolicious.  
+> **No trackbacks, no comments, no admin interface.  
 > Just plain file based blogging.**
 
 COPYRIGHT AND LICENCE
