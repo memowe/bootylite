@@ -4,17 +4,28 @@ use FindBin '$Bin';
 use lib "$Bin/lib";
 use Mojolicious::Lite;
 use Bootylite;
-use Text::Markdown 'markdown';
 use POSIX 'strftime';
 
+# load configuration from bootylite.conf
 my $config = plugin 'config';
 
+# prepare for some booty action!
 my $booty = Bootylite->new(
     articles_dir    => $config->{articles_dir},
     encoding        => $config->{file_encoding},
 );
 
-app->helper(markdown => sub { markdown $_[1] });
+my $rs = $booty->renderers; # TODO whytf do I need this?
+
+# article render helpers
+app->helper(first2html => sub {
+    $booty->render_article_part($_[1], 'first')
+});
+app->helper(second2html => sub {
+    $booty->render_article_part($_[1], 'second')
+});
+
+# strftime helper for date and time formatting stuff
 app->helper(strftime => sub { shift; strftime @_ });
 
 get '/' => sub {
@@ -39,7 +50,6 @@ __DATA__
 % title 'Welcome to Bootylite';
 <div id="articles">
 % foreach my $article (@$articles) {
-%   my $teaser = $article->teaser // $article->content;
     <div class="article">
         <h2><%= $article->meta->{title} // 'No title' %></h2>
         <div class="meta">
@@ -54,7 +64,7 @@ __DATA__
 %       }
             </span>
         </div>
-        <div class="teaser"><%== markdown $teaser %></div>
+        <div class="teaser"><%== first2html $article %></div>
     </div>
 % }
 </div>
