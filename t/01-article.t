@@ -20,7 +20,7 @@ isa_ok($a, 'Bootylite::Article', 'constructor return value');
 is_deeply($a, {filename => $afn[0]}, 'right structure');
 
 # build time
-is_deeply($a->time, 1304200800, 'right time');
+is_deeply($a->time, 1301608800, 'right time');
 
 # build url part
 is($a->url, 'no_hour_and_minute', 'right url part');
@@ -29,7 +29,7 @@ is($a->url, 'no_hour_and_minute', 'right url part');
 $a = Bootylite::Article->new(filename => $afn[1]);
 
 # build time
-is_deeply($a->time, 1304595420, 'right time');
+is_deeply($a->time, 1302003420, 'right time');
 
 # build url part
 is($a->url, 'test_that_shit1', 'right url part');
