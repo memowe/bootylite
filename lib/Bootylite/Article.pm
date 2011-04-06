@@ -14,9 +14,9 @@ has url         => sub { shift->_build_and_inject_filename_data->url };
 has extension   => sub { shift->_build_and_inject_filename_data->extension };
 has raw_content => sub { shift->_build_raw_content };
 has meta        => sub { shift->_build_and_inject_content_data->meta };
-has teaser      => sub { shift->_build_and_inject_content_data->teaser };
+has first       => sub { shift->_build_and_inject_content_data->first };
 has separator   => sub { shift->_build_and_inject_content_data->separator };
-has content     => sub { shift->_build_and_inject_content_data->content };
+has second      => sub { shift->_build_and_inject_content_data->second };
 
 # inject date and url from filename
 sub _build_and_inject_filename_data {
@@ -58,7 +58,7 @@ sub _build_raw_content {
     return b($encoded)->decode($self->encoding)->to_string;
 }
 
-# split content in meta data, teaser, separator and content and inject
+# split content in meta data, first part, separator and second part and inject
 sub _build_and_inject_content_data {
     my $self = shift;
     my $raw  = $self->raw_content;
@@ -70,28 +70,28 @@ sub _build_and_inject_content_data {
     # arrify tags
     $meta{tags} = [ split /,\s*/ => $meta{tags} // '' ];
 
-    # extract teaser, separator and content
+    # extract first part, separator and second part
     die 'content unparseable: ' . $raw unless $raw =~ /\A
-        (?:                 # optional teaser part
-            (.*)            # teaser
+        (.*?)               # first part
+        (?:                 # optional second part
             ^\[cut\]        # separator start
             [ \t]*          # separator separator
             ([^\n]+)?       # optional separator text
-            \n              # separator end
-        )?                  # end of optional teaser part
-        (.*)                # content part
+            \n+             # separator end
+            (.*)            # second part
+        )?                  # end of optional second part
     \z/smx;
     
     # build
-    my $teaser      = $1;
+    my $first       = $1;
     my $separator   = $2;
-    my $content     = $3;
+    my $second      = $3;
 
     # inject and chain
     return $self->meta(\%meta)
-                ->teaser($teaser)
+                ->first($first)
                 ->separator($separator)
-                ->content($content);
+                ->second($second);
 }
 
 !! 42;

@@ -53,20 +53,20 @@ is_deeply($a->meta, {
 }, 'right meta data');
 
 # build content data
-is($a->teaser, undef, 'no teaser found');
+is($a->first, "€\n\nfoo\n", 'right first part');
 is($a->separator, undef, 'no separator found');
-is($a->content, "€\n\nfoo\n", 'right content');
+is($a->second, undef, 'no second part');
 
-# build an article with teaser
+# build an article with second part
 $a = Bootylite::Article->new(filename => $afn[2]);
-is($a->teaser, "€\n\n", 'right teaser');
+is($a->first, "€\n\n", 'right first part');
 is($a->separator, undef, 'no separator found');
-is($a->content, "\nfoo\n", 'right content');
+is($a->second, "foo\n", 'right second part');
 
-# build an article with teaser and separator
+# build an article with separator text
 $a = Bootylite::Article->new(filename => $afn[3]);
-is($a->teaser, "€\n\n", 'right teaser');
+is($a->first, "€\n\n", 'right first part');
 is($a->separator, 'qux quux', 'right separator');
-is($a->content, "\nfoo\n", 'right content');
+is($a->second, "foo\n", 'right second part');
 
 __END__

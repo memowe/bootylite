@@ -32,7 +32,7 @@ my $a = $b->get_article('test3');
 ok(defined($a), 'article found by url');
 isa_ok($a, 'Bootylite::Article', 'found article');
 is($a->url, 'test3', 'found the right article');
-is($a->content, "\nfoo\n", 'right content');
+is($a->second, "foo\n", 'right content');
 
 # caching
 $a      = $b->articles->[1];
@@ -65,12 +65,12 @@ is(scalar(@gay), 0, 'no articles for the gay tag');
 # render a markdown document
 $a = $b->get_article('test5');
 is(
-    $b->render_article_part($a, 'teaser'),
+    $b->render_article_part($a, 'first'),
     "<p>foo <strong>teaser</strong></p>\n",
     'right html'
 );
 is(
-    $b->render_article_part($a, 'content'),
+    $b->render_article_part($a, 'second'),
     "<p>bar <em>content</em></p>\n",
     'right html'
 );
