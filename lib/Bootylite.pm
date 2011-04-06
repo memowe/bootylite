@@ -1,22 +1,23 @@
 package Bootylite;
 
 use Mojo::Base -base;
-use Mojo::Asset::File;
 use Bootylite::Article;
+use Mojo::Loader;
 
 has articles_dir    => sub { die 'no articles directory given' };
 has encoding        => 'utf-8';
+has articles        => sub { shift->_build_articles };  # aref of Articles
+has renderers       => sub { shift->_build_renderers }; # href: ext => renderer
 
-# Bootylite::Article objects
-has articles => sub {
+sub _build_articles {
     my $self = shift;
 
-    # glob markdown files
+    # glob article files
     my @articles;
-    my @md_files = sort glob $self->articles_dir . '/*.md';
+    my @article_files = sort glob $self->articles_dir . '/*';
 
     # scan articles
-    foreach my $filename (@md_files) {
+    foreach my $filename (@article_files) {
         push @articles, Bootylite::Article->new(
             filename    => $filename,
             encoding    => $self->encoding,
@@ -24,7 +25,35 @@ has articles => sub {
     }
 
     return \@articles;
-};
+}
+
+sub _build_renderers {
+    my $self = shift;
+
+    # search for renderers
+    my $loader      = Mojo::Loader->new;
+    my $renderers   = $loader->search('Bootylite::Renderer');
+    
+    # build renderers
+    my %renderer;
+    foreach my $r (@$renderers) {
+
+        # load
+        my $error = $loader->load($r);
+        die $error if $error;
+
+        # really a renderer?
+        my $renderer = $r->new;
+        next unless $r->isa('Bootylite::Renderer');
+        
+        # register
+        my $ext = lc $renderer->extension;
+        $renderer{$ext} = $renderer;
+    }
+
+    # done!
+    return \%renderer;
+}
 
 sub get_article {
     my ($self, $url) = @_;
@@ -40,7 +69,12 @@ sub get_article {
     return;
 }
 
-sub refresh { delete shift->{articles} }
+sub refresh {
+    my $self = shift;
+
+    # articles will load on demand lazily
+    delete $self->{articles};
+}
 
 sub get_tags {
     my $self = shift;
@@ -60,6 +94,19 @@ sub get_articles_by_tag {
 
     # collect articles that match
     return grep { $tag ~~ @{$_->meta->{tags}} } @{$self->articles};
+}
+
+sub render_article_part {
+    my ($self, $article, $part) = @_;
+
+    # try to find the right renderer
+    my $ext = $article->extension;
+    my $renderer = $self->renderers->{$ext};
+    die "couldn't find a $ext renderer" unless $renderer;
+
+    # render
+    my $text = $article->$part // return;
+    return $renderer->render($text);
 }
 
 !! 42;

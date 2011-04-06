@@ -4,13 +4,13 @@ use strict;
 use warnings;
 use utf8;
 
-use Test::More;
-use Mojo::ByteStream 'b';
+use Test::More tests => 29;
 
+use Mojo::ByteStream 'b';
 use FindBin '$Bin';
 use lib "$Bin/../lib";
 
-use Bootylite;
+use_ok('Bootylite');
 
 # build object
 my $dir = "$Bin/articles";
@@ -19,7 +19,7 @@ isa_ok($b, 'Bootylite', 'constructor return value');
 is_deeply($b, {articles_dir => $dir}, 'right structure');
 
 # build articles
-my @fns = sort glob("$dir/*.md");
+my @fns = sort glob("$dir/*");
 my @articles = @{$b->articles};
 is(scalar(@articles), scalar(@fns), 'found '.@fns.' articles');
 foreach my $i (0 .. $#articles) {
@@ -28,10 +28,10 @@ foreach my $i (0 .. $#articles) {
 }
 
 # get article by url
-my $a = $b->get_article('test_that_shit2');
+my $a = $b->get_article('test3');
 ok(defined($a), 'article found by url');
 isa_ok($a, 'Bootylite::Article', 'found article');
-is($a->url, 'test_that_shit2', 'found the right article');
+is($a->url, 'test3', 'found the right article');
 is($a->content, "\nfoo\n", 'right content');
 
 # caching
@@ -49,7 +49,7 @@ $b->refresh;
 is($b->get_article($url)->raw_content, $raw, "$url is back");
 
 # tagcloud
-is_deeply($b->get_tags, {foo => 2, bar => 1, baz => 2}, 'right tag cloud');
+is_deeply($b->get_tags, {foo => 2, bar => 1, baz => 3}, 'right tag cloud');
 
 # get articles by tag
 my @foo = $b->get_articles_by_tag('foo');
@@ -57,11 +57,22 @@ my @bar = $b->get_articles_by_tag('bar');
 my @baz = $b->get_articles_by_tag('baz');
 my @gay = $b->get_articles_by_tag('gay');
 sub urls { [ map { $_->url } @_ ] };
-is_deeply( urls(@foo), [qw(test_that_shit1 test_that_shit2)], 'right articles');
-is_deeply( urls(@bar), [qw(test_that_shit1)], 'right articles');
-is_deeply( urls(@baz), [qw(test_that_shit2 test_that_shit3)], 'right articles');
+is_deeply( urls(@foo), [qw(test2 test3)], 'right articles');
+is_deeply( urls(@bar), [qw(test2)], 'right articles');
+is_deeply( urls(@baz), [qw(test3 test4 test5)], 'right articles');
 is(scalar(@gay), 0, 'no articles for the gay tag');
 
-done_testing;
+# render a markdown document
+$a = $b->get_article('test5');
+is(
+    $b->render_article_part($a, 'teaser'),
+    "<p>foo <strong>teaser</strong></p>\n",
+    'right html'
+);
+is(
+    $b->render_article_part($a, 'content'),
+    "<p>bar <em>content</em></p>\n",
+    'right html'
+);
 
 __END__
