@@ -11,6 +11,7 @@ has filename    => sub { die 'no file name given' };
 has encoding    => 'utf-8';
 has time        => sub { shift->_build_and_inject_filename_data->time };
 has url         => sub { shift->_build_and_inject_filename_data->url };
+has extension   => sub { shift->_build_and_inject_filename_data->extension };
 has raw_content => sub { shift->_build_raw_content };
 has meta        => sub { shift->_build_and_inject_content_data->meta };
 has teaser      => sub { shift->_build_and_inject_content_data->teaser };
@@ -31,15 +32,18 @@ sub _build_and_inject_filename_data {
         -(\d\d)             # day
         (?:-(\d\d)-(\d\d))? # optional: hour and minute
         _(.*)               # url part
-        \.[a-z]+            # extension
-    $/x;
+        \.([a-z]+)          # extension
+    $/ix;
 
-    # build date and url part
+    # build date, url part and extension
     my $time = timelocal(0, $5 // 0, $4 // 0, $3, $2 - 1, $1);
     my $url  = lc $6;
+    my $ext  = lc $7;
 
     # inject and chain
-    return $self->time($time)->url($url);
+    return $self->time($time)
+                ->url($url)
+                ->extension($ext);
 }
 
 # slurp that shit

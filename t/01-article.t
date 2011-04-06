@@ -25,6 +25,9 @@ is_deeply($a->time, 1301608800, 'right time');
 # build url part
 is($a->url, 'no_hour_and_minute', 'right url part');
 
+# file name extension
+is($a->extension, 'md', 'right file name extension');
+
 # build another article
 $a = Bootylite::Article->new(filename => $afn[1]);
 
@@ -33,6 +36,9 @@ is_deeply($a->time, 1302003420, 'right time');
 
 # build url part
 is($a->url, 'test_that_shit1', 'right url part');
+
+# file name extension
+is($a->extension, 'md', 'right file name extension');
 
 # build decoded raw content
 my $content = $a->raw_content;
