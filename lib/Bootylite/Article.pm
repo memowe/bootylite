@@ -6,14 +6,19 @@ use File::Spec::Functions 'splitpath';
 use Time::Local 'timelocal';
 use Mojo::ByteStream 'b';
 
-# note: all this shit is very lazy
-
-# bootylite articles are file system based
+# lazyness ftw
 has filename    => sub { die 'no file name given' };
 has encoding    => 'utf-8';
+has time        => sub { shift->_build_and_inject_filename_data->time };
+has url         => sub { shift->_build_and_inject_filename_data->url };
+has raw_content => sub { shift->_build_raw_content };
+has meta        => sub { shift->_build_and_inject_content_data->meta };
+has teaser      => sub { shift->_build_and_inject_content_data->teaser };
+has separator   => sub { shift->_build_and_inject_content_data->separator };
+has content     => sub { shift->_build_and_inject_content_data->content };
 
 # inject date and url from filename
-sub _inject_filename_data {
+sub _build_and_inject_filename_data {
     my $self = shift;
 
     # extract file name
@@ -37,12 +42,8 @@ sub _inject_filename_data {
     return $self->time($time)->url($url);
 }
 
-# get date or url from filename
-has time    => sub { shift->_inject_filename_data->time };
-has url     => sub { shift->_inject_filename_data->url };
-
 # slurp that shit
-has raw_content => sub {
+sub _build_raw_content {
     my $self = shift;
 
     # slurp
@@ -51,10 +52,10 @@ has raw_content => sub {
 
     # decode
     return b($encoded)->decode($self->encoding)->to_string;
-};
+}
 
 # split content in meta data, teaser, separator and content and inject
-sub _inject_content_data {
+sub _build_and_inject_content_data {
     my $self = shift;
     my $raw  = $self->raw_content;
 
@@ -88,12 +89,6 @@ sub _inject_content_data {
                 ->separator($separator)
                 ->content($content);
 }
-
-# extract content data from raw content
-has meta        => sub { shift->_inject_content_data->meta };
-has teaser      => sub { shift->_inject_content_data->teaser };
-has separator   => sub { shift->_inject_content_data->separator };
-has content     => sub { shift->_inject_content_data->content };
 
 !! 42;
 __END__
