@@ -163,7 +163,15 @@ __DATA__
 @@ show_article.html.ep
     <div class="article">
 % my $hl_tag = $single ? 'h1' : 'h2';
-        <<%= $hl_tag %>><%= $article->meta->{title} %></<%= $hl_tag %>>
+        <<%= $hl_tag %>>
+%   unless ($single) {
+            <a href="<%= url_for 'article', article_url => $article->url %>">
+%   }
+                <%= $article->meta->{title} =%>
+%   unless ($single) {
+            </a>
+%   }
+        </<%= $hl_tag %>>
         <div class="meta">
             <span class="time"><%= date $article %></span>,
             <span class="tags">Tags:
