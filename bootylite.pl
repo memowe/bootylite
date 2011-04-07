@@ -18,13 +18,14 @@ my $booty = Bootylite->new(
     articles_dir    => $config->{articles_dir},
     encoding        => $config->{file_encoding},
 );
+app->helper(booty => sub { $booty });
 
 # article render helpers
 app->helper(first2html => sub {
-    $booty->render_article_part($_[1], 'first')
+    shift->booty->render_article_part(shift, 'first')
 });
 app->helper(second2html => sub {
-    $booty->render_article_part($_[1], 'second')
+    shift->booty->render_article_part(shift, 'second')
 });
 
 # date and time formatting stuff
@@ -45,10 +46,10 @@ get '/index' => sub {
     my $self = shift;
 
     # get articles
-    my $articles = $booty->articles;
+    my $articles = $self->booty->articles;
 
     # store reverse
-    $self->stash(articles => [reverse @{$booty->articles}]);
+    $self->stash(articles => [reverse @{$self->booty->articles}]);
 } => 'index';
 
 # one article
@@ -57,7 +58,7 @@ get '/article/:article_url' => sub {
 
     # get that article
     my $url     = $self->param('article_url');
-    my $article = $booty->get_article($url);
+    my $article = $self->booty->get_article($url);
     $self->render_not_found and return unless $article;
 
     # store
@@ -70,7 +71,7 @@ get '/tag/:tag' => sub {
 
     # get articles
     my $tag         = $self->param('tag');
-    my @articles    = $booty->get_articles_by_tag($tag);
+    my @articles    = $self->booty->get_articles_by_tag($tag);
     $self->render_not_found and return unless @articles;
 
     # store
@@ -85,7 +86,7 @@ get '/tags' => sub {
     my $self = shift;
 
     # get tag cloud: {tag => amount}
-    my $amount  = $booty->get_tags;
+    my $amount  = $self->booty->get_tags;
     my $sum     = sum values %$amount;
 
     # store
