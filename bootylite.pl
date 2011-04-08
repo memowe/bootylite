@@ -70,7 +70,7 @@ get '/tag/:tag' => sub {
 
     # get articles
     my $tag         = $self->param('tag');
-    my @articles    = $self->booty->get_articles_by_tag($tag);
+    my @articles    = reverse $self->booty->get_articles_by_tag($tag);
     $self->render_not_found and return unless @articles;
 
     # store
