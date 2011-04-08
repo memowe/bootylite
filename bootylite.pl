@@ -139,11 +139,13 @@ __DATA__
 @@ tag.html.ep
 % layout 'bootyblack';
 % title config('name') . ' - ' . $tag;
+<h1>Tag <%= $tag %></h1>
 %= include 'list_articles', single => 0
 
 @@ tags.html.ep
 % layout 'bootyblack';
 % title config('name') . ' - Tagcloud';
+<h1>All tags</h1>
 <div id="tags">
 % foreach my $tag (@$tags) {
 %   my $ratio   = config('tag_cloud_scale') * $amount->{$tag} / $sum;
@@ -162,16 +164,13 @@ __DATA__
 
 @@ show_article.html.ep
     <div class="article">
-% my $hl_tag = $single ? 'h1' : 'h2';
-        <<%= $hl_tag %>>
-%   unless ($single) {
-            <a href="<%= url_for 'article', article_url => $article->url %>">
-%   }
+%   if ($single) {
+        <h1><%= $article->meta->{title} %></h1>
+%   } else {
+        <h2><a href="<%= url_for 'article', article_url => $article->url %>">
                 <%= $article->meta->{title} =%>
-%   unless ($single) {
-            </a>
+        </a></h2>
 %   }
-        </<%= $hl_tag %>>
         <div class="meta">
             <span class="time"><%= date $article %></span>,
             <span class="tags">Tags:
