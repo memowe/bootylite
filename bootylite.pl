@@ -28,14 +28,13 @@ app->helper(second2html => sub {
     shift->booty->render_article_part(shift, 'second')
 });
 
-# date and time formatting stuff
+# date and time formatting
+app->helper(strftime => sub { shift; strftime @_ });
 app->helper(date => sub {
-    strftime $config->{date_format}, localtime $_[1]->time
+    shift->strftime($config->{date_format}, localtime shift->time)
 });
-
-# date and time formatting for the feed
 app->helper(feed_date => sub {
-    strftime '%Y-%m-%dT%H:%M:%SZ', gmtime $_[1]->time
+    shift->strftime('%Y-%m-%dT%H:%M:%SZ', gmtime shift->time)
 });
 
 # home page redirect
@@ -97,13 +96,17 @@ get '/tags' => sub {
     );
 } => 'tags';
 
+# pseudo static style sheets
+get '/screen_style';
+get '/print_style';
+
 app->start;
 __DATA__
 
 @@ index.html.ep
 % layout 'bootyblack';
 % title config 'name';
-<h1><%= config 'name' %></h1>
+<h1>Home</h1>
 %= include 'list_articles', single => 0
 
 @@ index.xml.ep
@@ -192,7 +195,75 @@ __DATA__
     </div>
 
 @@ layouts/bootyblack.html.ep
-<!doctype html><html>
-  <head><title><%= title %></title></head>
-  <body><%= content %></body>
+<!doctype html>
+<html>
+<head>
+<title><%= title %></title>
+<link rel="stylesheet" type="text/css" media="screen" href="
+    <%= url_for 'screen_style', format => 'css' =%>
+">
+<link rel="stylesheet" type="text/css" media="print" href="
+    <%= url_for 'print_style', format => 'css' =%>
+">
+</head>
+<body>
+<div id="header"><%= config 'name' %></div>
+<ul id="menu">
+    <li><a href="<%= url_for 'index', format => 'html' %>">Home</a></li>
+    <li><a href="<%= url_for 'tags' %>">Tags</a></li>
+</ul>
+<div id="main">
+%= content
+</div>
+<address>
+    &copy; <%= strftime '%Y', localtime %> <%= config 'author' %><br>
+    <span id="powered">
+        Powered by <a href="http://gihub.com/memowe/bootylite">Bootylite</a>
+        on <a href="http://mojolicio.us/">Mojolicious::Lite</a>
+        on <a href="http://perl.org/">Perl</a>
+    </span>
+</address>
+</body>
 </html>
+
+@@ screen_style.css.ep
+% my $left = '25%';
+html, body { margin: 0; padding: 0 }
+body { font-family: Helvetica, sans-serif; line-height: 145%; color: #ddd;
+    background: black url('/mojolicious-pinstripe.gif') repeat }
+#header { margin: 100px 0 50px <%= $left %>; font-size: 2em;
+    letter-spacing: 2ex; color: white; text-shadow: 0 0 30px white }
+#menu { display: block; margin: 0 0 10px <%= $left %>; padding: 0 }
+#menu li { display: inline; margin: 0 15px 0 5px; padding: 0; list-style: none }
+#menu a { text-decoration: none; color: #888; letter-spacing: .5ex }
+#menu a:hover { color: white; text-shadow: 0 0 15px white }
+#main { margin: 0 0 0 <%= $left %>; padding: 30px 50px 50px 50px;
+    background-color: #333;
+    border: solid #111; border-width: 2px 0 0 2px }
+#main a { color: inherit }
+#main h1 { font-size: 1.5em; font-weight: normal; background-color: #222;
+    margin: 0 0 1em; padding: .5em .8em .4em; letter-spacing: .3ex }
+#main h2 { font-size: 1.2em; font-weight: bold; border-bottom: 1px solid #999;
+    margin: 1.5em 0 1em; padding: 0 0 .3em; letter-spacing: -.05ex }
+#main h2 a { text-decoration: none; color: white }
+.article .meta { font-size: .8em }
+.article .tags a { text-decoration: none; font-weight: bold }
+.article .tags a:hover { text-decoration: underline }
+.article .teaser, .article #content { max-width: 80ex }
+.article .teaser { font-weight: bold }
+#articles .teaser { font-weight: normal }
+#tags { margin: 3em 0 0 }
+#tags a { font-weight: bold; text-decoration: none; padding: 0 .5ex }
+#tags a:hover { color: white }
+address { margin: 0 0 10px <%= $left %>; padding: 30px 50px; text-align: right;
+    background-color: #444; border: solid #111; border-width: 0 0 2px 2px;
+    font-size:.8em; letter-spacing:.2ex; font-style: normal; line-height: 130% }
+address #powered { color: #888 }
+address a { color: inherit }
+
+@@ print_style.css.ep
+html, body { margin: 0; padding: 0; color: black; background-color: white }
+body { font-family: serif; line-height: 120% }
+#header, #menu, address #powered { display: none }
+#main, address { border: none }
+a { text-decoration: none; color: black }
