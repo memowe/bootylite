@@ -194,6 +194,12 @@ __DATA__
 %   }
     </div>
 
+@@ not_found.html.ep
+% layout 'bootyblack';
+% title config('name') . '- NOT FOUND!';
+<h1>Whoops!</h1>
+<p>I couldn't find what you were looking for. Sorry!</p>
+
 @@ layouts/bootyblack.html.ep
 <!doctype html>
 <html>
