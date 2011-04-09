@@ -113,6 +113,18 @@ get '/page/:page_url' => sub {
     $self->stash(page => $page);
 } => 'page';
 
+# refresh the bootylite
+get $config->{refresh_url} => sub {
+    my $self = shift;
+
+    # refresh
+    $self->booty->refresh;
+
+    # done.
+    $self->res->headers->content_type('text/html');
+    $self->render_text('Done');
+} => 'refresh';
+
 # pseudo static style sheets
 get '/screen_style';
 get '/print_style';
