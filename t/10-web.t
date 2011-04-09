@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use utf8;
 
-use Test::More tests => 50;
+use Test::More tests => 54;
 use Test::Mojo;
 
 use FindBin '$Bin';
@@ -39,11 +39,12 @@ foreach my $i (0 .. $#articles) {
 is(
     $t->tx->res->dom->at('div.article:first-child .teaser p')->all_text,
     'foo teaser',
-    'div.article:nth-child($i) .teaser p',
+    'div.article:nth-child(1) .teaser p',
 );
-$t->text_is('div.article:nth-child(2) .teaser p', '€');
+$t->text_is('div.article:nth-child(2) .teaser p', 'Hello ');
 $t->text_is('div.article:nth-child(3) .teaser p', '€');
 $t->text_is('div.article:nth-child(4) .teaser p', '€');
+$t->text_is('div.article:nth-child(5) .teaser p', '€');
 
 # latest article
 my $url = '/article/' . $articles[0]->url;
@@ -53,7 +54,7 @@ $t->element_exists('.teaser')->element_exists('#content');
 # tag search
 $t->get_ok('/tag/foo')->text_is('h1', 'Tag foo')->element_exists('#articles');
 my $articles = $t->tx->res->dom->at('#articles')->children;
-is(scalar(@$articles), 2, 'found two articles');
+is(scalar(@$articles), 3, 'found 3 articles');
 
 # tag cloud
 $t->get_ok('/tags')->text_is('h1', 'All tags')->element_exists('#tags');

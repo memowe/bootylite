@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use utf8;
 
-use Test::More tests => 29;
+use Test::More tests => 33;
 
 use Mojo::ByteStream 'b';
 use FindBin '$Bin';
@@ -49,7 +49,7 @@ $b->refresh;
 is($b->get_article($url)->raw_content, $raw, "$url is back");
 
 # tagcloud
-is_deeply($b->get_tags, {foo => 2, bar => 1, baz => 3}, 'right tag cloud');
+is_deeply($b->get_tags, {foo => 3, bar => 1, baz => 3}, 'right tag cloud');
 
 # get articles by tag
 my @foo = $b->get_articles_by_tag('foo');
@@ -57,13 +57,13 @@ my @bar = $b->get_articles_by_tag('bar');
 my @baz = $b->get_articles_by_tag('baz');
 my @gay = $b->get_articles_by_tag('gay');
 sub urls { [ map { $_->url } @_ ] };
-is_deeply( urls(@foo), [qw(test2 test3)], 'right articles');
+is_deeply( urls(@foo), [qw(test2 test3 test5)], 'right articles');
 is_deeply( urls(@bar), [qw(test2)], 'right articles');
-is_deeply( urls(@baz), [qw(test3 test4 test5)], 'right articles');
+is_deeply( urls(@baz), [qw(test3 test4 test6)], 'right articles');
 is(scalar(@gay), 0, 'no articles for the gay tag');
 
 # render a markdown document
-$a = $b->get_article('test5');
+$a = $b->get_article('test6');
 is(
     $b->render_page_part($a, 'first'),
     "<p>foo <strong>teaser</strong></p>\n",
@@ -72,6 +72,19 @@ is(
 is(
     $b->render_page_part($a, 'second'),
     "<p>bar <em>content</em></p>\n",
+    'right html'
+);
+
+# render a html document
+$a = $b->get_article('test5');
+is(
+    $b->render_page_part($a, 'first'),
+    "<p>Hello <em>world!</em></p>\n\n",
+    'right html'
+);
+is(
+    $b->render_page_part($a, 'second'),
+    "<h2>Wow, it works!</h2>\n",
     'right html'
 );
 
