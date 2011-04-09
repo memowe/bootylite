@@ -25,7 +25,7 @@ is($p->extension, 'md', 'right file name extension');
 
 # build decoded raw content
 my $content = $p->raw_content;
-like($content, qr/This page rocks/, 'right raw content');
+like($content, qr/This \*page\* rocks/, 'right raw content');
 like($content, qr/€/, 'right decoded raw content');
 
 # build meta data
@@ -35,6 +35,6 @@ is_deeply($p->meta, {
 }, 'right meta data');
 
 # build content
-is($p->content, "This page rocks.€\n", 'right content');
+is($p->content, "This *page* rocks.€\n", 'right content');
 
 __END__

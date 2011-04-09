@@ -5,8 +5,10 @@ use Bootylite::Article;
 use Mojo::Loader;
 
 has articles_dir    => sub { die 'no articles directory given' };
+has pages_dir       => sub { die 'no pages directory given' };
 has encoding        => 'utf-8';
 has articles        => sub { shift->_build_articles };  # aref of Articles
+has pages           => sub { shift->_build_pages };     # aref of Pages
 has renderers       => sub { shift->_build_renderers }; # href: ext => renderer
 
 sub _build_articles {
@@ -14,7 +16,8 @@ sub _build_articles {
 
     # glob article files
     my @articles;
-    my @article_files = sort glob $self->articles_dir . '/*';
+    my @article_files   = sort glob $self->articles_dir . '/*';
+    @article_files      = grep { ! /\.bak$/ } @article_files;
 
     # scan articles
     foreach my $filename (@article_files) {
@@ -25,6 +28,28 @@ sub _build_articles {
     }
 
     return \@articles;
+}
+
+sub _build_pages {
+    my $self = shift;
+
+    # glob page files
+    my @pages;
+    my @page_files  = glob $self->pages_dir . '/*';
+    @page_files     = grep { ! /\.bak$/ } @page_files;
+
+    # scan pages
+    foreach my $filename (@page_files) {
+        push @pages, Bootylite::Page->new(
+            filename    => $filename,
+            encoding    => $self->encoding,
+        );
+    }
+
+    # sort with sort meta header
+    @pages = sort { $a->meta->{sort} <=> $b->meta->{sort} } @pages;
+
+    return \@pages;
 }
 
 sub _build_renderers {
@@ -69,11 +94,26 @@ sub get_article {
     return;
 }
 
+sub get_page {
+    my ($self, $url) = @_;
+
+    # scan pages
+    foreach my $page (@{$self->pages}) {
+
+        # found!
+        return $page if $page->url eq lc $url;
+    }
+
+    # not found!
+    return;
+}
+
 sub refresh {
     my $self = shift;
 
-    # articles will load on demand lazily
+    # they will load on demand lazily
     delete $self->{articles};
+    delete $self->{pages};
 }
 
 sub get_tags {
@@ -96,7 +136,7 @@ sub get_articles_by_tag {
     return grep { $tag ~~ @{$_->meta->{tags}} } @{$self->articles};
 }
 
-sub render_article_part {
+sub render_page_part {
     my ($self, $article, $part) = @_;
 
     # try to find the right renderer

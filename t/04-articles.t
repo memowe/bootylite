@@ -65,12 +65,12 @@ is(scalar(@gay), 0, 'no articles for the gay tag');
 # render a markdown document
 $a = $b->get_article('test5');
 is(
-    $b->render_article_part($a, 'first'),
+    $b->render_page_part($a, 'first'),
     "<p>foo <strong>teaser</strong></p>\n",
     'right html'
 );
 is(
-    $b->render_article_part($a, 'second'),
+    $b->render_page_part($a, 'second'),
     "<p>bar <em>content</em></p>\n",
     'right html'
 );
