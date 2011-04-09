@@ -182,10 +182,15 @@ __DATA__
 %       }
             </span>
         </div>
-        <div class="teaser"><%== first2html $article %></div>
 %   if ($single) {
+%       if ($article->second) {
+        <div class="teaser"><%== first2html $article %></div>
         <div id="content"><%== second2html $article %></div>
+%       } else {
+        <div id="content"><%== first2html $article %></div>
+%       }
 %   } else {
+        <div class="teaser"><%== first2html $article %></div>
 %       if ($article->second) {
         <p><a href="<%= url_for 'article', article_url => $article->url %>">
             <%= $article->separator // config 'separator' =%>
