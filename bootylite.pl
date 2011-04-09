@@ -243,7 +243,9 @@ __DATA__
 ">
 </head>
 <body>
-<div id="header"><%= config 'name' %></div>
+<div id="header"><a href="<%= url_for 'index', format => 'html' %>">
+    <%= config 'name' =%>
+</a></div>
 <ul id="menu">
     <li><a href="<%= url_for 'index', format => 'html' %>">Home</a></li>
     <li><a href="<%= url_for 'tags' %>">Tags</a></li>
@@ -272,8 +274,9 @@ __DATA__
 html, body { margin: 0; padding: 0 }
 body { font-family: Helvetica, sans-serif; line-height: 145%; color: #ddd;
     background: black url('/mojolicious-pinstripe.gif') repeat }
-#header { margin: 100px 0 50px <%= $left %>; font-size: 2em;
-    letter-spacing: 2ex; color: white; text-shadow: 0 0 30px white }
+#header { margin: 100px 0 50px <%= $left %>;}
+#header a { color: white; text-decoration: none; font-size: 2em;
+    letter-spacing: 2ex; text-shadow: 0 0 30px white }
 #menu { display: block; margin: 0 0 10px <%= $left %>; padding: 0 }
 #menu li { display: inline; margin: 0 15px 0 5px; padding: 0; list-style: none }
 #menu a { text-decoration: none; color: #888; letter-spacing: .5ex }
