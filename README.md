@@ -2,28 +2,35 @@ Bootylite - a simple file system based blog
 ===========================================
 
 > **No trackbacks, no comments, no admin interface.  
-> Just plain file based blogging.**
+> Just plain file based blogging with a feed and extra pages.**
+
+After vti's great Bootylicious becoming too big and unmaintained this is
+the next try to build a simple file system based blog on Mojolicious.
+
+And here's how it works:
+
+* write articles as text files and store them in the `articles` directory.
+* done.
+
+Look at
+
+1. the `articles` directory to see examples
+2. the `pages` directory to see examples
+3. the `bootylite.conf` file to customize Bootylite.
+4. the code.
+
+The renderer for articles and pages is determined by the file name extension.
+These renderers ship with Bootylite:
+
+* .md -> Bootylite::Renderer::Markdown
+* .html -> Bootylite::Renderer::HTML
+
+It's easy to extend Bootylite to get more Renderers: just use
+Bootylite::Renderer as a base class.
 
 COPYRIGHT AND LICENCE
 ---------------------
 
 Copyright (c) 2011 Mirko Westermeier, mail@memowe.de
 
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
-
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+See the file `MIT-LICENSE` in this distribution for details.
