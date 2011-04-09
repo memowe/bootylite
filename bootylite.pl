@@ -16,16 +16,20 @@ plugin charset => {charset => $config->{encoding}};
 # prepare for some booty action!
 my $booty = Bootylite->new(
     articles_dir    => $config->{articles_dir},
+    pages_dir       => $config->{pages_dir},
     encoding        => $config->{file_encoding},
 );
 app->helper(booty => sub { $booty });
 
-# article render helpers
+# page/article render helpers
 app->helper(first2html => sub {
-    shift->booty->render_article_part(shift, 'first')
+    shift->booty->render_page_part(shift, 'first')
 });
 app->helper(second2html => sub {
-    shift->booty->render_article_part(shift, 'second')
+    shift->booty->render_page_part(shift, 'second')
+});
+app->helper(content2html => sub {
+    shift->booty->render_page_part(shift, 'content')
 });
 
 # date and time formatting
@@ -96,6 +100,19 @@ get '/tags' => sub {
     );
 } => 'tags';
 
+# get a page
+get '/page/:page_url' => sub {
+    my $self = shift;
+
+    # get that page
+    my $url     = $self->param('page_url');
+    my $page    = $self->booty->get_page($url);
+    $self->render_not_found and return unless $page;
+
+    # store
+    $self->stash(page => $page);
+} => 'page';
+
 # pseudo static style sheets
 get '/screen_style';
 get '/print_style';
@@ -158,6 +175,14 @@ __DATA__
 % }
 </div>
 
+@@ page.html.ep
+% layout 'bootyblack';
+% title config('name') . ' - ' . $page->meta->{title};
+<div id="page">
+    <h1><%= $page->meta->{title} %></h1>
+    <div id="content"><%== content2html $page %></div>
+</div>
+
 @@ list_articles.html.ep
 <div id="articles">
 % foreach my $article (@$articles) {
@@ -201,7 +226,7 @@ __DATA__
 
 @@ not_found.html.ep
 % layout 'bootyblack';
-% title config('name') . '- NOT FOUND!';
+% title config('name') . ' - NOT FOUND!';
 <h1>Whoops!</h1>
 <p>I couldn't find what you were looking for. Sorry!</p>
 
@@ -222,6 +247,11 @@ __DATA__
 <ul id="menu">
     <li><a href="<%= url_for 'index', format => 'html' %>">Home</a></li>
     <li><a href="<%= url_for 'tags' %>">Tags</a></li>
+% foreach my $page (@{booty->pages}) {
+    <li><a href="<%= url_for 'page', page_url => $page->url %>">
+        <%= $page->meta->{title} =%>
+    </a></li>
+% }
 </ul>
 <div id="main">
 %= content
@@ -260,7 +290,7 @@ body { font-family: Helvetica, sans-serif; line-height: 145%; color: #ddd;
 .article .meta { font-size: .8em }
 .article .tags a { text-decoration: none; font-weight: bold }
 .article .tags a:hover { text-decoration: underline }
-.article .teaser, .article #content { max-width: 80ex }
+.article .teaser, .article #content, #page #content { max-width: 80ex }
 .article .teaser { font-weight: bold }
 #articles .teaser { font-weight: normal }
 #tags { margin: 3em 0 0 }

@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use utf8;
 
-use Test::More tests => 46;
+use Test::More tests => 50;
 use Test::Mojo;
 
 use FindBin '$Bin';
@@ -15,8 +15,9 @@ require "$ENV{MOJO_HOME}/bootylite.pl";
 my $t = Test::Mojo->new;
 $t->app->log->level('error');
 
-# inject test articles directory
+# inject test directories
 $t->app->booty->articles_dir("$Bin/articles");
+$t->app->booty->pages_dir("$Bin/pages");
 
 # home page redirect
 $t->max_redirects(0);
@@ -59,6 +60,13 @@ $t->get_ok('/tags')->text_is('h1', 'All tags')->element_exists('#tags');
 foreach my $tag (qw(foo bar baz)) {
     $t->text_is("#tags a[href\$=/tag/$tag]", $tag);
 }
+
+# menu with pages
+$t->text_is('#menu a[href$=/page/foo_bar_baz]', 'Test that shit, yo!');
+
+# foo_bar_baz page
+$t->get_ok('/page/foo_bar_baz')->text_is('h1', 'Test that shit, yo!');
+$t->text_is('#page em', 'page');
 
 # atom feed
 @articles = reverse @{$t->app->booty->articles};
