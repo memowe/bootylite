@@ -4,8 +4,8 @@ Bootylite - a simple file system based blog
 > **No trackbacks, no comments, no admin interface.  
 > Just plain file based blogging with a feed and extra pages.**
 
-After vti's great Bootylicious becoming too big and unmaintained this is
-the next try to build a simple file system based blog on Mojolicious.
+After vti's great Bootylicious becoming unmaintained this is the next try
+to build a simple file system based blog on Mojolicious.
 
 And here's how it works:
 
