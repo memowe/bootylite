@@ -1,7 +1,6 @@
 package Bootylite::Article;
 
 use Mojo::Base 'Bootylite::Page';
-use Mojo::Asset::File;
 use File::Spec::Functions 'splitpath';
 use Time::Local 'timelocal';
 use Mojo::ByteStream 'b';
