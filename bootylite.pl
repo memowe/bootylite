@@ -186,8 +186,8 @@ __DATA__
 % foreach my $tag (@$tags) {
 %   my $ratio   = $amount->{$tag} / $max;
 %   my $size    = $min_size + $ratio * ($max_size - $min_size);
-%  my $sstr    = sprintf '%.2f', $size;
-%  my $url     = url_for 'tag', tag => $tag;
+%   my $sstr    = sprintf '%.2f', $size;
+%   my $url     = url_for 'tag', tag => $tag;
     <a href="<%= $url %>" style="font-size: <%= $sstr %>em"><%= $tag %></a>
 % }
 </div>
