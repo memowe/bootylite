@@ -218,6 +218,18 @@ __DATA__
                 <a href="<%= url_for 'tag', tag => $tag %>"><%= $tag =%></a>
 %       }
             </span>
+%   if ($single) {
+%       if ($article->prev) {
+            <br><span class="prev_article">Previous: <a href="
+                <%= url_for 'article', article_url => $article->prev->url =%>
+            "><%= $article->prev->meta->{title} %></a></span>
+%       }
+%       if ($article->next) {
+            <br><span class="next_article">Next: <a href="
+                <%= url_for 'article', article_url => $article->next->url =%>
+            "><%= $article->next->meta->{title} %></a></span>
+%       }
+%   }
         </div>
 %   if ($single) {
 %       if ($article->second) {
@@ -305,7 +317,7 @@ body { font-family: Helvetica, sans-serif; line-height: 145%; color: #ddd;
 #main h2 { font-size: 1.2em; font-weight: bold; border-bottom: 1px solid #999;
     margin: 1.5em 0 1em; padding: 0 0 .3em; letter-spacing: -.05ex }
 #main h2 a { text-decoration: none; color: white }
-.article .meta { font-size: .8em }
+.article .meta { font-size: .8em; line-height: 120% }
 .article .tags a { text-decoration: none; font-weight: bold }
 .article .tags a:hover { text-decoration: underline }
 .article .teaser, .article #content, #page #content { max-width: 80ex }

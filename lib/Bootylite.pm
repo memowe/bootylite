@@ -27,6 +27,12 @@ sub _build_articles {
         );
     }
 
+    # link articles
+    foreach my $i (0 .. $#articles) {
+        $articles[$i]->prev($articles[$i-1]) if $i > 0;
+        $articles[$i]->next($articles[$i+1]) if $i < $#articles;
+    }
+
     return \@articles;
 }
 

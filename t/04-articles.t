@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use utf8;
 
-use Test::More tests => 33;
+use Test::More tests => 35;
 
 use Mojo::ByteStream 'b';
 use FindBin '$Bin';
@@ -33,6 +33,8 @@ ok(defined($a), 'article found by url');
 isa_ok($a, 'Bootylite::Article', 'found article');
 is($a->url, 'test3', 'found the right article');
 is($a->second, "foo\n", 'right content');
+is($a->prev->url, 'test2', 'right previous article');
+is($a->next->url, 'test4', 'right next article');
 
 # caching
 $a      = $b->articles->[1];
