@@ -5,7 +5,7 @@ use lib "$Bin/lib";
 use Mojolicious::Lite;
 use Bootylite;
 use POSIX 'strftime';
-use List::Util 'sum';
+use List::Util qw(min max);
 
 # load configuration from bootylite.conf
 my $config = plugin 'config';
@@ -90,13 +90,11 @@ get '/tags' => sub {
 
     # get tag cloud: {tag => amount}
     my $amount  = $self->booty->get_tags;
-    my $sum     = sum values %$amount;
 
     # store
     $self->stash(
         tags    => [sort keys %$amount],
         amount  => $amount,
-        sum     => $sum,
     );
 } => 'tags';
 
@@ -179,11 +177,18 @@ __DATA__
 % title config('name') . ' - Tagcloud';
 <h1>All tags</h1>
 <div id="tags">
+% use List::Util qw(min max);
+% my $min_size  = config 'tag_cloud_min';
+% my $max_size  = config 'tag_cloud_max';
+% my $min       = min values %$amount;
+% my $max       = max values %$amount;
+% my $count     = @$tags;
 % foreach my $tag (@$tags) {
-%   my $ratio   = config('tag_cloud_scale') * $amount->{$tag} / $sum;
-%   my $size    = sprintf '%2.2fem', $ratio;
-%   my $url     = url_for 'tag', tag => $tag;
-    <a href="<%= $url %>" style="font-size: <%= $size %>"><%= $tag %></a>
+%   my $ratio   = $amount->{$tag} / $max;
+%   my $size    = $min_size + $ratio * ($max_size - $min_size);
+%  my $sstr    = sprintf '%.2f', $size;
+%  my $url     = url_for 'tag', tag => $tag;
+    <a href="<%= $url %>" style="font-size: <%= $sstr %>em"><%= $tag %></a>
 % }
 </div>
 
@@ -323,7 +328,7 @@ body { font-family: Helvetica, sans-serif; line-height: 145%; color: #ddd;
 .article .teaser, .article #content, #page #content { max-width: 80ex }
 .article .teaser { font-weight: bold }
 #articles .teaser { font-weight: normal }
-#tags { margin: 3em 0 0 }
+#tags { margin: 3em 0 0; line-height: 200% }
 #tags a { font-weight: bold; text-decoration: none; padding: 0 .5ex }
 #tags a:hover { color: white }
 address { margin: 0 0 10px <%= $left %>; padding: 30px 50px; text-align: right;
