@@ -94,7 +94,7 @@ get '/tags' => sub {
 
     # store
     $self->stash(
-        tags    => [keys %$amount],
+        tags    => [sort keys %$amount],
         amount  => $amount,
         sum     => $sum,
     );
