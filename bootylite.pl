@@ -253,6 +253,9 @@ __DATA__
 <link rel="stylesheet" type="text/css" media="print" href="
     <%= url_for 'print_style', format => 'css' =%>
 ">
+<link rel="alternate" type="application/atom+xml" title="ATOM feed" href="
+    <%= url_for 'index', format => 'xml' =%>
+">
 </head>
 <body>
 <div id="header"><a href="<%= url_for 'index', format => 'html' %>">
