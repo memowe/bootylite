@@ -41,19 +41,50 @@ app->helper(feed_date => sub {
     shift->strftime('%Y-%m-%dT%H:%M:%SZ', gmtime shift->time)
 });
 
-# home page redirect
-get '/' => sub { shift->redirect_to('index', format => 'html') };
+# home page
+get '/' => sub {
+    my $self = shift;
 
-# home page (html or feed)
-get '/index' => sub {
+    # get first page of articles
+    my $perpage     = $self->config->{articles_per_page};
+    my @articles    = reverse @{$self->booty->articles};
+    my $max         = min($perpage - 1, $#articles);
+    my @first_page  = @articles[0 .. $max];
+
+    # store
+    $self->stash(
+        articles        => \@first_page,
+        has_next_page   => $perpage < @articles,
+    );
+} => 'index';
+
+# paged "home" page
+get '/page/:page' => [page => qr/[1-9]\d*/] => sub {
     my $self = shift;
 
     # get articles
-    my $articles = $self->booty->articles;
+    my @articles = reverse @{$self->booty->articles};
 
-    # store reverse
-    $self->stash(articles => [reverse @{$self->booty->articles}]);
-} => 'index';
+    # in range?
+    my $perpage = $self->config->{articles_per_page};
+    my $page    = $self->param('page');
+    $self->render_not_found and return
+        unless ($page - 1) * $perpage < @articles;
+
+    # calculate
+    my $start       = ($page - 1) * $perpage;
+    my $end         = min(($start + $perpage) - 1, $#articles);
+    my @paged       = @articles[$start .. $end];
+    my $prev_page   = $page > 1 ? $page - 1 : undef;
+    my $next_page   = $end < $#articles ? $page + 1 : undef;
+
+    # store
+    $self->stash(
+        articles    => \@paged,
+        prev_page   => $prev_page,
+        next_page   => $next_page,
+    );
+} => 'paged';
 
 # one article
 get '/articles/:article_url' => sub {
@@ -139,6 +170,17 @@ get '/pages/:page_url' => sub {
     $self->stash(page => $page);
 } => 'page';
 
+# atom feed
+get '/feed' => sub {
+    my $self = shift;
+
+    # get articles
+    my @articles = reverse @{$self->booty->articles};
+
+    # store
+    $self->stash(articles => \@articles);
+} => 'feed';
+
 # refresh the bootylite
 get $config->{refresh_url} => sub {
     my $self = shift;
@@ -163,31 +205,26 @@ __DATA__
 % title config 'name';
 <h1>Home</h1>
 %= include 'list_articles', single => 0
-
-@@ index.xml.ep
-<?xml version="1.0" encoding="<%= config 'encoding' %>"?>
-<feed xmlns="http://www.w3.org/2005/Atom">
-    <id><%= url_for('index', format => 'html')->to_abs %></id>
-    <title><%= config 'name' %></title>
-    <updated><%= feed_date $articles->[-1] %></updated>
-    <author><name><%= config 'author' %></name></author>
-    <link rel="self" href="<%= url_for('index', format => 'xml')->to_abs %>"/>
-    <generator>Bootylite</generator>
-% foreach my $article (@$articles) {
-%   my $url = url_for 'article', article_url => $article->url;
-    <entry>
-        <id><%= $url->to_abs %></id>
-        <title><%= $article->meta->{title} %></title>
-        <updated><%= feed_date $article %></updated>
-        <author><name><%= config 'author' %></name></author>
-        <link rel="alternate" href="<%= $url->to_abs %>"/>
-        <summary type="html"><%= first2html $article =%></summary>
-%   foreach my $tag (@{$article->meta->{tags}}) {
-        <category term="<%= $tag %>"/>
-%   }
-    </entry>
+% if ($has_next_page) {
+<p id="pager"><a href="<%= url_for 'paged', page => 2 %>">Earlier</a></p>
 % }
-</feed>
+
+@@ paged.html.ep
+% layout 'bootyblack';
+% title config('name') . ' - Page ' . $page;
+<h1>Page <%= $page %></h1>
+%= include 'list_articles', single => 0
+<p id="pager">
+% if (defined $prev_page) {
+    <a href="<%= url_for 'paged', page => $prev_page %>">Later</a>
+% }
+% if (defined $prev_page and defined $next_page) {
+    &ndash;
+% }
+% if (defined $next_page) {
+    <a href="<%= url_for 'paged', page => $next_page %>">Earlier</a>
+% }
+</p>
 
 @@ article.html.ep
 % layout 'bootyblack';
@@ -215,13 +252,13 @@ __DATA__
 
 @@ tag.html.ep
 % layout 'bootyblack';
-% title config('name') . ' - ' . $tag;
+% title config('name') . ' - Tag ' . $tag;
 <h1>Tag <%= $tag %></h1>
 %= include 'list_articles', single => 0
 
 @@ tags.html.ep
 % layout 'bootyblack';
-% title config('name') . ' - Tagcloud';
+% title config('name') . ' - All tags';
 <h1>All tags</h1>
 <div id="tags">
 % use List::Util qw(min max);
@@ -246,6 +283,31 @@ __DATA__
     <h1><%= $page->meta->{title} %></h1>
     <div id="content"><%== content2html $page %></div>
 </div>
+
+@@ feed.xml.ep
+<?xml version="1.0" encoding="<%= config 'encoding' %>"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id><%= url_for('index')->to_abs %></id>
+    <title><%= config 'name' %></title>
+    <updated><%= feed_date $articles->[-1] %></updated>
+    <author><name><%= config 'author' %></name></author>
+    <link rel="self" href="<%= url_for('feed', format => 'xml')->to_abs %>"/>
+    <generator>Bootylite</generator>
+% foreach my $article (@$articles) {
+%   my $url = url_for 'article', article_url => $article->url;
+    <entry>
+        <id><%= $url->to_abs %></id>
+        <title><%= $article->meta->{title} %></title>
+        <updated><%= feed_date $article %></updated>
+        <author><name><%= config 'author' %></name></author>
+        <link rel="alternate" href="<%= $url->to_abs %>"/>
+        <summary type="html"><%= first2html $article =%></summary>
+%   foreach my $tag (@{$article->meta->{tags}}) {
+        <category term="<%= $tag %>"/>
+%   }
+    </entry>
+% }
+</feed>
 
 @@ list_articles_short.html.ep
 <ul class="articles">
@@ -338,15 +400,15 @@ __DATA__
     <%= url_for 'print_style', format => 'css' =%>
 ">
 <link rel="alternate" type="application/atom+xml" title="ATOM feed" href="
-    <%= url_for 'index', format => 'xml' =%>
+    <%= url_for 'feed', format => 'xml' =%>
 ">
 </head>
 <body>
-<div id="header"><a href="<%= url_for 'index', format => 'html' %>">
+<div id="header"><a href="<%= url_for 'index' %>">
     <%= config 'name' =%>
 </a></div>
 <ul id="menu">
-    <li><a href="<%= url_for 'index', format => 'html' %>">Home</a></li>
+    <li><a href="<%= url_for 'index' %>">Home</a></li>
     <li><a href="<%= url_for 'archive' %>">Archive</a></li>
     <li><a href="<%= url_for 'tags' %>">Tags</a></li>
 % foreach my $page (@{booty->pages}) {
@@ -401,6 +463,8 @@ ul.articles .tags a { text-decoration: none; font-weight: bold }
 #tags { margin: 3em 0 0; line-height: 200% }
 #tags a { font-weight: bold; text-decoration: none; padding: 0 .5ex }
 #tags a:hover { color: white }
+#pager { font-size: .8em; margin: 2em 0 0; background-color: #222;
+    padding: .2em .5em .1em }
 address { margin: 0 0 10px <%= $left %>; padding: 30px 50px; text-align: right;
     background-color: #444; border: solid #111; border-width: 0 0 2px 2px;
     font-size:.8em; letter-spacing:.2ex; font-style: normal; line-height: 130% }
