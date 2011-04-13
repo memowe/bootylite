@@ -34,7 +34,7 @@ foreach my $i (0 .. $#articles) {
     my $url     = $articles[$i]->url;
     my $title   = $articles[$i]->meta->{title} // '';
     my $n       = $i + 1;
-    $t->text_like(".article:nth-child($n) a[href\$=article/$url]", qr/$title/);
+    $t->text_like(".article:nth-child($n) a[href\$=articles/$url]", qr/$title/);
 }
 is(
     $t->tx->res->dom->at('div.article:first-child .teaser p')->all_text,
@@ -47,7 +47,7 @@ $t->text_is('div.article:nth-child(4) .teaser p', '€');
 $t->text_is('div.article:nth-child(5) .teaser p', '€');
 
 # latest article
-my $url = '/article/' . $articles[0]->url;
+my $url = '/articles/' . $articles[0]->url;
 $t->get_ok($url)->text_is('h1', 'Test that shit, yo!');
 $t->element_exists('.teaser')->element_exists('#content');
 
@@ -86,7 +86,7 @@ is(scalar(@$articles), scalar(@articles), 'right number of articles in feed');
 foreach my $i (0 .. $#articles) {
     my $url     = $articles[$i]->url;
     my $title   = $articles[$i]->meta->{title} // '';
-    ok(defined($articles->[$i]->at("link[href\$=/article/$url]")), 'right url');
+    ok(defined($articles->[$i]->at("link[href\$=/articles/$url]")),'right url');
     is($articles->[$i]->at('title')->text, $title, 'right title');
 }
 

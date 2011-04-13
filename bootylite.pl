@@ -56,7 +56,7 @@ get '/index' => sub {
 } => 'index';
 
 # one article
-get '/article/:article_url' => sub {
+get '/articles/:article_url' => sub {
     my $self = shift;
 
     # get that article
@@ -67,6 +67,34 @@ get '/article/:article_url' => sub {
     # store
     $self->stash(article => $article);
 } => 'article';
+
+# archive
+get '/articles' => sub {
+    my $self = shift;
+
+    # get all articles
+    my $articles = $self->booty->articles;
+
+    # order by year, month
+    my %articles;
+    foreach my $article (@$articles) {
+
+        # extract year, month
+        my ($y, $m) = (localtime $article->time)[5, 4];
+        my $year    = $y + 1900;
+        my $month   = $m + 1;
+
+        # create array on demand
+        $articles{$year}{$month} = []
+            unless defined $articles{$year}{$month};
+
+        # insert
+        push @{$articles{$year}{$month}}, $article;
+    }
+
+    # store
+    $self->stash(articles => \%articles);
+} => 'archive';
 
 # articles by tag
 get '/tag/:tag' => sub {
@@ -166,6 +194,25 @@ __DATA__
 % title config('name') . ' - ' . $article->meta->{title};
 %= include 'show_article', article => $article, single => 1
 
+@@ archive.html.ep
+% layout 'bootyblack';
+% title config('name') . ' - Archive';
+% my @months = qw(
+%   January February March April May June
+%   July August September October November December
+% );
+<h1>Archive</h1>
+% foreach my $year (sort {$a<=>$b} keys %$articles) {
+<h2><%= $year %></h2>
+<ul class="months">
+%   foreach my $month (sort {$a<=>$b} keys %{$articles->{$year}}) {
+    <li><strong><%= $months[$month-1] %></strong>
+%=      include 'list_articles_short', articles => $articles->{$year}{$month}
+    </li>
+%   }
+</ul>
+% }
+
 @@ tag.html.ep
 % layout 'bootyblack';
 % title config('name') . ' - ' . $tag;
@@ -200,6 +247,26 @@ __DATA__
     <div id="content"><%== content2html $page %></div>
 </div>
 
+@@ list_articles_short.html.ep
+<ul class="articles">
+% foreach my $article (@$articles) {
+%   my $url = url_for 'article', article_url => $article->url;
+    <li>
+        <strong><a href="<%= $url %>">
+            <%= $article->meta->{title} =%>
+        </a></strong><br>
+        <span class="meta">
+            <span class="time"><%= date $article %></span>,
+            <span class="tags">Tags:
+%   foreach my $tag (@{$article->meta->{tags} // []}) {
+                <a href="<%= url_for 'tag', tag => $tag %>"><%= $tag %></a>
+%   }
+            </span>
+        </span>
+    </li>
+% }
+</ul>
+
 @@ list_articles.html.ep
 <div id="articles">
 % foreach my $article (@$articles) {
@@ -220,7 +287,7 @@ __DATA__
             <span class="time"><%= date $article %></span>,
             <span class="tags">Tags:
 %       foreach my $tag (@{$article->meta->{tags} // []}) {
-                <a href="<%= url_for 'tag', tag => $tag %>"><%= $tag =%></a>
+                <a href="<%= url_for 'tag', tag => $tag %>"><%= $tag %></a>
 %       }
             </span>
 %   if ($single) {
@@ -280,6 +347,7 @@ __DATA__
 </a></div>
 <ul id="menu">
     <li><a href="<%= url_for 'index', format => 'html' %>">Home</a></li>
+    <li><a href="<%= url_for 'archive' %>">Archive</a></li>
     <li><a href="<%= url_for 'tags' %>">Tags</a></li>
 % foreach my $page (@{booty->pages}) {
     <li><a href="<%= url_for 'page', page_url => $page->url %>">
@@ -328,6 +396,8 @@ body { font-family: Helvetica, sans-serif; line-height: 145%; color: #ddd;
 .article .teaser, .article #content, #page #content { max-width: 80ex }
 .article .teaser { font-weight: bold }
 #articles .teaser { font-weight: normal }
+ul.articles { font-size: .8em; line-height: 145% }
+ul.articles .tags a { text-decoration: none; font-weight: bold }
 #tags { margin: 3em 0 0; line-height: 200% }
 #tags a { font-weight: bold; text-decoration: none; padding: 0 .5ex }
 #tags a:hover { color: white }
