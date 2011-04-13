@@ -16,8 +16,9 @@ Look at
 
 1. the `articles` directory to see examples
 2. the `pages` directory to see examples
-3. the `bootylite.conf` file to customize Bootylite.
-4. the code.
+3. the `bootylite.conf` file to change the Bootylite parameters.
+4. the templates (`bootylite.pl inflate`) to customize Bootylite
+5. the code.
 
 The renderer for articles and pages is determined by the file name extension.
 These renderers ship with Bootylite:
