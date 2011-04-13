@@ -127,7 +127,7 @@ get '/tags' => sub {
 } => 'tags';
 
 # get a page
-get '/page/:page_url' => sub {
+get '/pages/:page_url' => sub {
     my $self = shift;
 
     # get that page

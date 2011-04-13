@@ -63,10 +63,10 @@ foreach my $tag (qw(foo bar baz)) {
 }
 
 # menu with pages
-$t->text_is('#menu a[href$=/page/foo_bar_baz]', 'Test that shit, yo!');
+$t->text_is('#menu a[href$=/pages/foo_bar_baz]', 'Test that shit, yo!');
 
 # foo_bar_baz page
-$t->get_ok('/page/foo_bar_baz')->text_is('h1', 'Test that shit, yo!');
+$t->get_ok('/pages/foo_bar_baz')->text_is('h1', 'Test that shit, yo!');
 $t->text_is('#page em', 'page');
 
 # atom feed
