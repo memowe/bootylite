@@ -139,7 +139,13 @@ sub get_articles_by_tag {
     my $tag     = lc shift;
 
     # collect articles that match
-    return grep { $tag ~~ @{$_->meta->{tags}} } @{$self->articles};
+    my @matching;
+    foreach my $article (@{$self->articles}) {
+        my @tags = @{$article->meta->{tags}};
+        push @matching, $article if $tag ~~ @tags;
+    }
+
+    return @matching;
 }
 
 sub render_page_part {
