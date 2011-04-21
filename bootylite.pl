@@ -73,7 +73,7 @@ get '/page/:page' => [page => qr/[1-9]\d*/] => sub {
 
     # calculate
     my $start       = ($page - 1) * $perpage;
-    my $end         = min(($start + $perpage) - 1, $#articles);
+    my $end         = min($start + $perpage - 1, $#articles);
     my @paged       = @articles[$start .. $end];
     my $prev_page   = $page > 1 ? $page - 1 : undef;
     my $next_page   = $end < $#articles ? $page + 1 : undef;
@@ -175,7 +175,7 @@ get '/feed' => sub {
     my $self = shift;
 
     # get articles
-    my @articles = reverse @{$self->booty->articles};
+    my @articles = @{$self->booty->articles};
 
     # store
     $self->stash(articles => \@articles);

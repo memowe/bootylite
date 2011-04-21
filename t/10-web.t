@@ -99,7 +99,7 @@ $t->text_is('title', 'Bootylite - Test that shit, yo!');
 $t->text_is('h1', 'Test that shit, yo!')->text_is('#page em', 'page');
 
 # atom feed
-@articles = reverse @{$t->app->booty->articles};
+@articles = @{$t->app->booty->articles};
 $t->get_ok('/feed.xml')->status_is(200)->content_type_like(qr/xml/);
 my $encoding = 'utf-8';
 like(
