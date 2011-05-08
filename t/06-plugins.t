@@ -6,7 +6,6 @@ use utf8;
 
 use Test::More tests => 27;
 use Test::Mojo;
-use Mojolicious::Plugin::Config;
 
 use FindBin '$Bin';
 use lib "$Bin/../lib";
