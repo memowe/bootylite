@@ -29,6 +29,23 @@ These renderers ship with Bootylite:
 It's easy to extend Bootylite to get more Renderers: just use
 Bootylite::Renderer as a base class.
 
+Plugins
+-------
+
+Plugin authors can inherit from Bootylite::Plugin to extend Bootylite's
+functionality. Look at [Bootylite::Plugin::Comments][bpc] for an example.
+You can find a simple (but useless) plugin in the test suite. Plugin
+configuration lives in the `bootylite.conf` config file:
+
+    plugins => {
+        comments => {
+            comments_dir => app->home->rel_dir('comments'),
+            encoding     => 'utf-8',
+        },
+    },
+
+[bpc]: http://gihub.com/memowe/bootylite-plugin-comments
+
 COPYRIGHT AND LICENCE
 ---------------------
 

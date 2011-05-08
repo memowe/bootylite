@@ -4,11 +4,15 @@ use FindBin '$Bin';
 use lib "$Bin/lib";
 use Mojolicious::Lite;
 use Bootylite;
+use Bootylite::Plugins;
 use POSIX 'strftime';
 use List::Util qw(min max);
 
 # load configuration from bootylite.conf
 my $config = plugin 'config';
+
+# set cookie secret
+app->secret($config->{secret} // 'Bootylite');
 
 # use the right character encoding
 plugin charset => {charset => $config->{encoding}};
@@ -41,6 +45,17 @@ app->helper(feed_date => sub {
     shift->strftime('%Y-%m-%dT%H:%M:%SZ', gmtime shift->time)
 });
 
+# register plugins
+my $plugins = Bootylite::Plugins->new;
+if ($config->{plugins} and ref $config->{plugins} eq 'HASH') {
+    while (my ($name, $conf) = each %{$config->{plugins}}) {
+        $plugins->add($name, $conf);
+    }
+}
+
+# plugin startup hook
+$plugins->call_startup(app);
+
 # home page
 get '/' => sub {
     my $self = shift;
@@ -56,6 +71,8 @@ get '/' => sub {
         articles        => \@first_page,
         has_next_page   => $perpage < @articles,
     );
+
+    $plugins->call_index($self);
 } => 'index';
 
 # paged "home" page
@@ -84,6 +101,8 @@ get '/page/:page' => [page => qr/[1-9]\d*/] => sub {
         prev_page   => $prev_page,
         next_page   => $next_page,
     );
+
+    $plugins->call_paged($self);
 } => 'paged';
 
 # one article
@@ -97,6 +116,8 @@ get '/articles/:article_url' => sub {
 
     # store
     $self->stash(article => $article);
+
+    $plugins->call_article($self);
 } => 'article';
 
 # archive
@@ -125,6 +146,8 @@ get '/articles' => sub {
 
     # store
     $self->stash(articles => \%articles);
+
+    $plugins->call_archive($self);
 } => 'archive';
 
 # articles by tag
@@ -141,6 +164,8 @@ get '/tag/:tag' => sub {
         tag         => $tag,
         articles    => \@articles,
     );
+
+    $plugins->call_tag($self);
 } => 'tag';
 
 # get the whole tag cloud
@@ -155,6 +180,8 @@ get '/tags' => sub {
         tags    => [sort keys %$amount],
         amount  => $amount,
     );
+
+    $plugins->call_tags($self);
 } => 'tags';
 
 # get a page
@@ -168,6 +195,8 @@ get '/pages/:page_url' => sub {
 
     # store
     $self->stash(page => $page);
+
+    $plugins->call_page($self);
 } => 'page';
 
 # atom feed
@@ -179,6 +208,8 @@ get '/feed' => sub {
 
     # store
     $self->stash(articles => \@articles);
+
+    $plugins->call_feed($self);
 } => 'feed';
 
 # refresh the bootylite
@@ -189,6 +220,7 @@ get $config->{refresh_url} => sub {
     $self->booty->refresh;
 
     # done.
+    $plugins->call_refresh($self);
     $self->res->headers->content_type('text/html');
     $self->render_text('Done');
 } => 'refresh';
