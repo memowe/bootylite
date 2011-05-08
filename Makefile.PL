@@ -11,7 +11,7 @@ WriteMakefile(
     NAME            => 'Bootylite',
     VERSION_FROM    => 'lib/Bootylite.pm',
     AUTHOR          => 'Mirko Westermeier <mail@memowe.de>',
-    EXE_FILES       => ['bootylite'],
+    EXE_FILES       => ['bootylite.pl'],
     PREREQ_PM => {
         'Mojolicious'           => '1.16',
         'Text::Markdown'        => '1.0',
