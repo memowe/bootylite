@@ -44,7 +44,7 @@ configuration lives in the `bootylite.conf` config file:
         },
     },
 
-[bpc]: http://gihub.com/memowe/bootylite-plugin-comments
+[bpc]: http://github.com/memowe/bootylite-plugin-comments
 
 COPYRIGHT AND LICENCE
 ---------------------
