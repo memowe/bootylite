@@ -519,6 +519,10 @@ address { margin: 0 0 10px <%= $left %>; padding: 30px 50px; text-align: right;
     font-size:.8em; letter-spacing:.2ex; font-style: normal; line-height: 130% }
 address #powered { color: #888 }
 address a { color: inherit }
+pre { color: black; background-color: white; border: 2px solid green; padding: 1em;
+    overflow: auto; overflow-y: visible; width: 600px;
+    -webkit-box-shadow: 10px 10px 5px #888888; -moz-box-shadow: 10px 10px 5px #888888;
+    box-shadow: 10px 10px 5px #888888; }
 
 @@ print_style.css.ep
 html, body { margin: 0; padding: 0; color: black; background-color: white }
