@@ -212,6 +212,20 @@ get '/feed' => sub {
     $plugins->call_feed($self);
 } => 'feed';
 
+# atom feed by tag
+get '/feed/:tag' => sub {
+    my $self = shift;
+
+    # get articles
+    my $tag         = $self->param('tag');
+    my @articles    = reverse $self->booty->get_articles_by_tag($tag);
+
+    # store
+    $self->stash(articles => \@articles);
+
+    $plugins->call_feed($self);
+} => 'feed_tag';
+
 # refresh the bootylite
 get $config->{refresh_url} => sub {
     my $self = shift;
@@ -340,6 +354,9 @@ __DATA__
     </entry>
 % }
 </feed>
+
+@@ feed_tag.xml.ep
+%= include 'feed';
 
 @@ list_articles_short.html.ep
 <ul class="articles">
