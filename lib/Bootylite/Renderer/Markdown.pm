@@ -1,6 +1,6 @@
 package Bootylite::Renderer::Markdown;
 
-use Mojo::Base 'Bootylite::Renderer'; 
+use Mojo::Base 'Bootylite::Renderer';
 use Text::Markdown;
 
 has extension => 'md';

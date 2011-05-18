@@ -63,7 +63,7 @@ sub _build_and_inject_content_data {
             (.*)            # second part
         )?                  # end of optional second part
     \z/smx;
-    
+
     # build
     my $first       = $1;
     my $separator   = $2;

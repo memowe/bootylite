@@ -1,6 +1,6 @@
 package Bootylite::Renderer::HTML;
 
-use Mojo::Base 'Bootylite::Renderer'; 
+use Mojo::Base 'Bootylite::Renderer';
 
 has extension => 'html';
 
