@@ -472,9 +472,7 @@ __DATA__
 <address>
     &copy; <%= strftime '%Y', localtime %> <%= config 'author' %><br>
     <span id="powered">
-        Powered by <a href="http://gihub.com/memowe/bootylite">Bootylite</a>
-        on <a href="http://mojolicio.us/">Mojolicious::Lite</a>
-        on <a href="http://perl.org/">Perl</a>
+        <%== config 'footer' %>
     </span>
 </address>
 </body>
