@@ -10,3 +10,6 @@ META.yml
 MANIFEST*
 !MANIFEST.SKIP
 pm_to_blib
+articles
+pages
+comments
