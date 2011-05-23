@@ -478,9 +478,7 @@ __DATA__
 </div>
 <address>
     &copy; <%= strftime '%Y', localtime %> <%= config 'author' %><br>
-    <span id="powered">
-        <%== config 'footer' %>
-    </span>
+    <span id="powered"><%== config 'footer' %></span>
 </address>
 </body>
 </html>
