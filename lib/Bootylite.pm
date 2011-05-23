@@ -64,7 +64,7 @@ sub _build_renderers {
     # search for renderers
     my $loader      = Mojo::Loader->new;
     my $renderers   = $loader->search('Bootylite::Renderer');
-    
+
     # build renderers
     my %renderer;
     foreach my $r (@$renderers) {
@@ -76,7 +76,7 @@ sub _build_renderers {
         # really a renderer?
         my $renderer = $r->new;
         next unless $r->isa('Bootylite::Renderer');
-        
+
         # register
         my $ext = lc $renderer->extension;
         $renderer{$ext} = $renderer;
