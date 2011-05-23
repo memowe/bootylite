@@ -49,6 +49,11 @@ sub feed {
     my ($self, $c) = @_;
 }
 
+# will be called before tag feed rendering
+sub tag_feed {
+    my ($self, $c) = @_;
+}
+
 # will be called after refreshing
 sub refresh {
     my ($self, $c) = @_;

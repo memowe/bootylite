@@ -218,13 +218,14 @@ get '/feed/:tag' => sub {
 
     # get articles
     my $tag         = $self->param('tag');
-    my @articles    = reverse $self->booty->get_articles_by_tag($tag);
+    my @articles    = $self->booty->get_articles_by_tag($tag);
+    $self->render_not_found and return unless @articles;
 
     # store
     $self->stash(articles => \@articles);
 
-    $plugins->call_feed($self);
-} => 'feed_tag';
+    $plugins->call_tag_feed($self);
+} => 'tag_feed';
 
 # refresh the bootylite
 get $config->{refresh_url} => sub {
@@ -297,7 +298,8 @@ __DATA__
 % }
 
 @@ tag.html.ep
-% layout 'bootyblack';
+% my $feed_url = url_for 'tag_feed', tag => $tag, format => 'xml';
+% layout 'bootyblack', tag_feed_url => $feed_url;
 % title config('name') . ' - Tag ' . $tag;
 <h1>Tag <%= $tag %></h1>
 %= include 'list_articles', single => 0
@@ -355,7 +357,7 @@ __DATA__
 % }
 </feed>
 
-@@ feed_tag.xml.ep
+@@ tag_feed.xml.ep
 %= include 'feed';
 
 @@ list_articles_short.html.ep
@@ -451,6 +453,11 @@ __DATA__
 <link rel="alternate" type="application/atom+xml" title="ATOM feed" href="
     <%= url_for 'feed', format => 'xml' =%>
 ">
+% { no strict 'vars'; if (defined $tag_feed_url) {
+<link rel="alternate" type="application/atom+xml" title="ATOM tag feed" href="
+    <%= $tag_feed_url =%>
+">
+% } }
 </head>
 <body>
 <div id="header"><a href="<%= url_for 'index' %>">
