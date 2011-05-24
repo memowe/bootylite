@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use utf8;
 
-use Test::More tests => 81;
+use Test::More tests => 93;
 use Test::Mojo;
 
 use FindBin '$Bin';
@@ -109,14 +109,26 @@ like(
 );
 $t->text_is('title', 'Bootylite');
 $t->text_is('author name', 'Zaphod Beeblebrox');
-my $feed_dom = $t->tx->res->dom;
-$articles = $feed_dom->find('feed entry');
+$articles = $t->tx->res->dom->find('feed entry');
 is(scalar(@$articles), scalar(@articles), 'right number of articles in feed');
 foreach my $i (0 .. $#articles) {
     my $url     = $articles[$i]->url;
     my $title   = $articles[$i]->meta->{title} // '';
     ok(defined($articles->[$i]->at("link[href\$=/articles/$url]")),'right url');
     is($articles->[$i]->at('title')->text, $title, 'right title');
+}
+
+# atom tag feed
+$t->get_ok('/feed/void.xml')->status_is(404);
+my @foo = $t->app->booty->get_articles_by_tag('foo');
+$t->get_ok('/feed/foo.xml')->status_is(200)->content_type_like(qr/xml/);
+my $foo = $t->tx->res->dom->find('feed entry');
+is(scalar(@$foo), scalar(@foo), 'right number of foo tagged articles in feed');
+foreach my $i (0 .. $#foo) {
+    my $url     = $foo[$i]->url;
+    my $title   = $foo[$i]->meta->{title} // '';
+    ok(defined($foo->[$i]->at("link[href\$=/articles/$url]")),'right url');
+    is($foo->[$i]->at('title')->text, $title, 'right title');
 }
 
 __END__
