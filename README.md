@@ -1,7 +1,7 @@
 Bootylite - a simple file system based blog
 ===========================================
 
-> **No trackbacks, no comments, no admin interface.  
+> **No trackbacks, no comments (in core), no admin interface.  
 > Just plain file based blogging with a feed and extra pages.**
 
 After vti's great Bootylicious becoming unmaintained this is the next try
