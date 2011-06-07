@@ -204,10 +204,13 @@ get '/feed' => sub {
     my $self = shift;
 
     # get articles
-    my @articles = @{$self->booty->articles};
+    my $perpage       = $self->config->{articles_per_page};
+    my @articles      = @{$self->booty->articles};
+    my $max           = min($perpage - 1, $#articles);
+    my @articles_feed = @articles[0 .. $max];
 
     # store
-    $self->stash(articles => \@articles);
+    $self->stash(articles => \@articles_feed);
 
     $plugins->call_feed($self);
 } => 'feed';
@@ -217,12 +220,15 @@ get '/feed/:tag' => sub {
     my $self = shift;
 
     # get articles
-    my $tag         = $self->param('tag');
-    my @articles    = $self->booty->get_articles_by_tag($tag);
+    my $perpage       = $self->config->{articles_per_page};
+    my $tag           = $self->param('tag');
+    my @articles      = $self->booty->get_articles_by_tag($tag);
+    my $max           = min($perpage - 1, $#articles);
+    my @articles_feed = @articles[0 .. $max];
     $self->render_not_found and return unless @articles;
 
     # store
-    $self->stash(articles => \@articles);
+    $self->stash(articles => \@articles_feed);
 
     $plugins->call_tag_feed($self);
 } => 'tag_feed';
