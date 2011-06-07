@@ -204,7 +204,7 @@ get '/feed' => sub {
     my $self = shift;
 
     # get articles
-    my $perpage = $self->config->{articles_per_page};
+    my $perpage = $self->config->{articles_per_feed};
 
     # Order feed
     my @articles;
@@ -229,7 +229,7 @@ get '/feed/:tag' => sub {
     my $self = shift;
 
     # get articles
-    my $perpage = $self->config->{articles_per_page};
+    my $perpage = $self->config->{articles_per_feed};
     my $tag     = $self->param('tag');
 
     # Order feed
