@@ -536,6 +536,7 @@ body { font-family: Helvetica, sans-serif; line-height: 145%; color: #ddd;
 #articles .teaser { font-weight: normal }
 ul.articles { font-size: .8em; line-height: 145% }
 ul.articles .tags a { text-decoration: none; font-weight: bold }
+.comment { background-color: gray; padding: 0.5em 1em; margin: 1em 3em;}
 #tags { margin: 3em 0 0; line-height: 200% }
 #tags a { font-weight: bold; text-decoration: none; padding: 0 .5ex }
 #tags a:hover { color: white }
