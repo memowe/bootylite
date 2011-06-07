@@ -204,8 +204,17 @@ get '/feed' => sub {
     my $self = shift;
 
     # get articles
-    my $perpage       = $self->config->{articles_per_page};
-    my @articles      = @{$self->booty->articles};
+    my $perpage = $self->config->{articles_per_page};
+
+    # Order feed
+    my @articles;
+    if ( $self->config->{feed_order} eq 'desc' ) {
+        @articles  =  reverse @{$self->booty->articles};
+    }
+    else {
+        @articles  = @{$self->booty->articles};
+    }
+
     my $max           = min($perpage - 1, $#articles);
     my @articles_feed = @articles[0 .. $max];
 
@@ -220,12 +229,21 @@ get '/feed/:tag' => sub {
     my $self = shift;
 
     # get articles
-    my $perpage       = $self->config->{articles_per_page};
-    my $tag           = $self->param('tag');
-    my @articles      = $self->booty->get_articles_by_tag($tag);
+    my $perpage = $self->config->{articles_per_page};
+    my $tag     = $self->param('tag');
+
+    # Order feed
+    my @articles;
+    if ( $self->config->{feed_order} eq 'desc' ) {
+        @articles = reverse $self->booty->get_articles_by_tag($tag);
+    }
+    else {
+        @articles = $self->booty->get_articles_by_tag($tag);
+    }
+
     my $max           = min($perpage - 1, $#articles);
     my @articles_feed = @articles[0 .. $max];
-    $self->render_not_found and return unless @articles;
+    $self->render_not_found and return unless @articles_feed;
 
     # store
     $self->stash(articles => \@articles_feed);
