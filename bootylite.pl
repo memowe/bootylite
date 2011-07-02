@@ -478,7 +478,7 @@ __DATA__
 </div>
 <address>
     &copy; <%= strftime '%Y', localtime %> <%= config 'author' %><br>
-    <span id="powered"><%== config 'footer' %></span>
+    <span id="footer"><%== config 'footer' %></span>
 </address>
 </body>
 </html>
@@ -520,14 +520,14 @@ ul.articles .tags a { text-decoration: none; font-weight: bold }
 address { margin: 0 0 10px <%= $left %>; padding: 30px 50px; text-align: right;
     background-color: #444; border: solid #111; border-width: 0 0 2px 2px;
     font-size:.8em; letter-spacing:.2ex; font-style: normal; line-height: 130% }
-address #powered { color: #888 }
 address a { color: inherit }
+#footer { color: #888 }
 pre { background-color: #222; padding: .5em 2ex; line-height: 130%;
     overflow: auto; max-width: 100ex }
 
 @@ print_style.css.ep
 html, body { margin: 0; padding: 0; color: black; background-color: white }
 body { font-family: serif; line-height: 120% }
-#header, #menu, address #powered { display: none }
+#header, #menu, #footer { display: none }
 #main, address { border: none }
 a { text-decoration: none; color: black }

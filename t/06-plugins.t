@@ -12,7 +12,7 @@ use lib "$Bin/../lib";
 
 # use custom Bootylite to test
 $ENV{MOJO_HOME}   = "$Bin/../";
-$ENV{MOJO_CONFIG} = 't/bootylite.conf';
+$ENV{MOJO_CONFIG} = 't/bootylite_plugins.conf';
 require "$ENV{MOJO_HOME}/bootylite.pl";
 my $t = Test::Mojo->new;
 

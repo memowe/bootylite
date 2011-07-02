@@ -4,19 +4,16 @@ use strict;
 use warnings;
 use utf8;
 
-use Test::More tests => 93;
+use Test::More tests => 94;
 use Test::Mojo;
 
 use FindBin '$Bin';
 use lib "$Bin/../lib";
 
-$ENV{MOJO_HOME} = "$Bin/../";
+$ENV{MOJO_HOME}     = "$Bin/../";
+$ENV{MOJO_CONFIG}   = 't/bootylite.conf';
 require "$ENV{MOJO_HOME}/bootylite.pl";
 my $t = Test::Mojo->new;
-
-# inject test directories
-$t->app->booty->articles_dir("$Bin/articles");
-$t->app->booty->pages_dir("$Bin/pages");
 
 # home page
 $t->get_ok('/')->status_is(200);
@@ -39,6 +36,7 @@ $t->text_is('.article:nth-child(3) .teaser p', '€');
 $t->text_is('.article:nth-child(4) .teaser p', '€');
 $t->text_is('#pager a', 'Earlier');
 $t->element_exists('#pager a[href$=/page/2]');
+$t->text_is('#footer', 'test footer');
 
 # second page
 $t->get_ok('/page/2')->status_is(200);
