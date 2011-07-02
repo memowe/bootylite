@@ -6,7 +6,6 @@ use utf8;
 
 use Test::More tests => 35;
 
-use Mojo::ByteStream 'b';
 use FindBin '$Bin';
 use lib "$Bin/../lib";
 
