@@ -9,6 +9,7 @@ has time        => sub { shift->_build_and_inject_filename_data->time };
 has first       => sub { shift->_build_and_inject_content_data->first };
 has separator   => sub { shift->_build_and_inject_content_data->separator };
 has second      => sub { shift->_build_and_inject_content_data->second };
+has content     => sub { die 'Articles have first and second, not content' };
 has 'next';
 has 'prev';
 
