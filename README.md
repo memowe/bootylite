@@ -14,11 +14,12 @@ And here's how it works:
 
 Look at
 
-1. the `articles` directory to see examples
-2. the `pages` directory to see examples
-3. the `bootylite.conf` file to change the Bootylite parameters.
-4. the templates (`bootylite.pl inflate`) to customize Bootylite
-5. the code.
+1. the `articles` directory to see examples.
+2. the `drafts` directory to see how to preview articles before publishing.
+3. the `pages` directory to see examples for content pages.
+4. the `bootylite.conf` file to change the Bootylite parameters.
+5. the templates (`bootylite.pl inflate`) to customize Bootylite
+6. the code.
 
 The renderer for articles and pages is determined by the file name extension.
 These renderers ship with Bootylite:

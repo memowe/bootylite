@@ -15,6 +15,7 @@ sub tags        { $_[1]->render_text('test tags') }
 sub page        { $_[1]->render_text('test page') }
 sub feed        { $_[1]->render_text('test feed') }
 sub tag_feed    { $_[1]->render_text('test tag feed') }
+sub draft       { $_[1]->render_text('test draft') }
 sub refresh     { $_[1]->render_text('test refresh') }
 
 !! 42;

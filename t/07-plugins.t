@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use utf8;
 
-use Test::More tests => 30;
+use Test::More tests => 33;
 use Test::Mojo;
 
 use FindBin '$Bin';
@@ -28,6 +28,7 @@ $t->get_ok('/tags')             ->status_is(200)->content_is('test tags');
 $t->get_ok('/pages/foo_bar_baz')->status_is(200)->content_is('test page');
 $t->get_ok('/feed.xml')         ->status_is(200)->content_is('test feed');
 $t->get_ok('/feed/foo.xml')     ->status_is(200)->content_is('test tag feed');
+$t->get_ok('/drafts/draft1')    ->status_is(200)->content_is('test draft');
 $t->get_ok('/refresh')          ->status_is(200)->content_is('test refresh');
 
 __END__

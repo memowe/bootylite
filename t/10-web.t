@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use utf8;
 
-use Test::More tests => 94;
+use Test::More tests => 99;
 use Test::Mojo;
 
 use FindBin '$Bin';
@@ -95,6 +95,12 @@ $t->text_is('#menu a[href$=/pages/foo_bar_baz]', 'Test that shit, yo!');
 $t->get_ok('/pages/foo_bar_baz')->status_is(200);
 $t->text_is('title', 'Bootylite - Test that shit, yo!');
 $t->text_is('h1', 'Test that shit, yo!')->text_is('#page em', 'page');
+
+# second draft
+$t->get_ok('/drafts/draft2')->status_is(200);
+$t->text_is('title', 'Bootylite - Test Draft Two');
+$t->text_is('h1', 'Test Draft Two');
+$t->text_is('#content p', 'second draft');
 
 # atom feed
 @articles = @{$t->app->booty->articles};

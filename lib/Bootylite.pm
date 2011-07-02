@@ -1,14 +1,17 @@
 package Bootylite;
 
 use Mojo::Base -base;
+use Bootylite::Page;
 use Bootylite::Article;
 use Mojo::Loader;
 
 has articles_dir    => sub { die 'no articles directory given' };
 has pages_dir       => sub { die 'no pages directory given' };
+has drafts_dir      => sub { die 'no drafts directory given' };
 has encoding        => 'utf-8';
 has articles        => sub { shift->_build_articles };  # aref of Articles
 has pages           => sub { shift->_build_pages };     # aref of Pages
+has drafts          => sub { shift->_build_drafts };    # aref of Articles
 has renderers       => sub { shift->_build_renderers }; # href: ext => renderer
 
 sub _build_articles {
@@ -56,6 +59,25 @@ sub _build_pages {
     @pages = sort { $a->meta->{sort} <=> $b->meta->{sort} } @pages;
 
     return \@pages;
+}
+
+sub _build_drafts {
+    my $self = shift;
+
+    # glob draft files
+    my @drafts;
+    my @draft_files = sort glob $self->drafts_dir . '/*';
+    @draft_files    = grep { ! /\.bak$/ } @draft_files;
+
+    # scan drafts
+    foreach my $filename (@draft_files) {
+        push @drafts, Bootylite::Article->new(
+            filename    => $filename,
+            encoding    => $self->encoding,
+        );
+    }
+
+    return \@drafts;
 }
 
 sub _build_renderers {
@@ -108,6 +130,20 @@ sub get_page {
 
         # found!
         return $page if $page->url eq lc $url;
+    }
+
+    # not found!
+    return;
+}
+
+sub get_draft {
+    my ($self, $url) = @_;
+
+    # scan drafts
+    foreach my $draft (@{$self->drafts}) {
+
+        # found!
+        return $draft if $draft->url eq lc $url;
     }
 
     # not found!

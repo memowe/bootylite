@@ -21,6 +21,7 @@ plugin charset => {charset => $config->{encoding}};
 my $booty = Bootylite->new(
     articles_dir    => $config->{articles_dir},
     pages_dir       => $config->{pages_dir},
+    drafts_dir      => $config->{drafts_dir},
     encoding        => $config->{file_encoding},
 );
 app->helper(booty => sub { $booty });
@@ -227,6 +228,21 @@ get '/feed/:tag' => sub {
     $plugins->call_tag_feed($self);
 } => 'tag_feed';
 
+# render articles before publishing
+get $config->{drafts_url} . '/:draft_url' => sub {
+    my $self = shift;
+
+    # get draft
+    my $url     = $self->param('draft_url');
+    my $draft   = $self->booty->get_draft($url);
+    $self->render_not_found and return unless $draft;
+
+    # store
+    $self->stash(draft => $draft);
+
+    $plugins->call_draft($self);
+} => 'draft';
+
 # refresh the bootylite
 get $config->{refresh_url} => sub {
     my $self = shift;
@@ -331,6 +347,11 @@ __DATA__
     <h1><%= $page->meta->{title} %></h1>
     <div id="content"><%== content2html $page %></div>
 </div>
+
+@@ draft.html.ep
+% layout 'bootyblack';
+% title config('name') . ' - ' . $draft->meta->{title};
+%= include 'show_article', article => $draft, single => 1
 
 @@ feed.xml.ep
 <?xml version="1.0" encoding="<%= config 'encoding' %>"?>

@@ -31,6 +31,7 @@ sub call_tags       { $_->tags(@_)      for @{shift->plugins} };
 sub call_page       { $_->page(@_)      for @{shift->plugins} };
 sub call_feed       { $_->feed(@_)      for @{shift->plugins} };
 sub call_tag_feed   { $_->tag_feed(@_)  for @{shift->plugins} };
+sub call_draft      { $_->draft(@_)     for @{shift->plugins} };
 sub call_refresh    { $_->refresh(@_)   for @{shift->plugins} };
 
 !! 42;
