@@ -491,6 +491,9 @@ __DATA__
     <li><a href="<%= url_for 'index' %>">Home</a></li>
     <li><a href="<%= url_for 'archive' %>">Archive</a></li>
     <li><a href="<%= url_for 'tags' %>">Tags</a></li>
+%   if (config('feed_link')) {
+        <li><a href="<%= url_for 'feed', format => 'xml' =%>">Feed</a></li>
+%   }
 % foreach my $page (@{booty->pages}) {
     <li><a href="<%= url_for 'page', page_url => $page->url %>">
         <%= $page->meta->{title} =%>
