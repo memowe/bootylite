@@ -326,6 +326,9 @@ __DATA__
 % layout 'bootyblack', tag_feed_url => $feed_url;
 % title config('name') . ' - Tag ' . $tag;
 <h1>Tag <%= $tag %></h1>
+% if ( defined($feed_url) ) {
+    <a href="<%= $feed_url =%>">Feed of <%= $tag %></a>
+% }
 %= include 'list_articles', single => 0
 
 @@ tags.html.ep
