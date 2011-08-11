@@ -499,7 +499,11 @@ __DATA__
 </div>
 <address>
     &copy; <%= strftime '%Y', localtime %> <%= config 'author' %><br>
-    <span id="footer"><%== config 'footer' %></span>
+    <span id="footer">
+        Powered by <a href="http://github.com/memowe/bootylite">Bootylite</a>
+        on <a href="http://mojolicio.us/">Mojolicious::Lite</a>
+        on <a href="http://perl.org/">Perl</a>
+    </span>
 </address>
 </body>
 </html>

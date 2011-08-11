@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use utf8;
 
-use Test::More tests => 99;
+use Test::More tests => 98;
 use Test::Mojo;
 
 use FindBin '$Bin';
@@ -36,7 +36,6 @@ $t->text_is('.article:nth-child(3) .teaser p', '€');
 $t->text_is('.article:nth-child(4) .teaser p', '€');
 $t->text_is('#pager a', 'Earlier');
 $t->element_exists('#pager a[href$=/page/2]');
-$t->text_is('#footer', 'test footer');
 
 # second page
 $t->get_ok('/page/2')->status_is(200);
