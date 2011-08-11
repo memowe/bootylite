@@ -205,10 +205,22 @@ get '/feed' => sub {
     my $self = shift;
 
     # get articles
-    my @articles = @{$self->booty->articles};
+    my $perpage = $self->config->{articles_per_feed};
+
+    # Order feed
+    my @articles;
+    if ( $self->config->{feed_order} eq 'desc' ) {
+        @articles  =  reverse @{$self->booty->articles};
+    }
+    else {
+        @articles  = @{$self->booty->articles};
+    }
+
+    my $max           = min($perpage - 1, $#articles);
+    my @articles_feed = @articles[0 .. $max];
 
     # store
-    $self->stash(articles => \@articles);
+    $self->stash(articles => \@articles_feed);
 
     $plugins->call_feed($self);
 } => 'feed';
@@ -218,12 +230,24 @@ get '/feed/:tag' => sub {
     my $self = shift;
 
     # get articles
-    my $tag         = $self->param('tag');
-    my @articles    = $self->booty->get_articles_by_tag($tag);
-    $self->render_not_found and return unless @articles;
+    my $perpage = $self->config->{articles_per_feed};
+    my $tag     = $self->param('tag');
+
+    # Order feed
+    my @articles;
+    if ( $self->config->{feed_order} eq 'desc' ) {
+        @articles = reverse $self->booty->get_articles_by_tag($tag);
+    }
+    else {
+        @articles = $self->booty->get_articles_by_tag($tag);
+    }
+
+    my $max           = min($perpage - 1, $#articles);
+    my @articles_feed = @articles[0 .. $max];
+    $self->render_not_found and return unless @articles_feed;
 
     # store
-    $self->stash(articles => \@articles);
+    $self->stash(articles => \@articles_feed);
 
     $plugins->call_tag_feed($self);
 } => 'tag_feed';
@@ -318,6 +342,9 @@ __DATA__
 % layout 'bootyblack', tag_feed_url => $feed_url;
 % title config('name') . ' - Tag ' . $tag;
 <h1>Tag <%= $tag %></h1>
+% if ( defined($feed_url) ) {
+    <a href="<%= $feed_url =%>">Feed of <%= $tag %></a>
+% }
 %= include 'list_articles', single => 0
 
 @@ tags.html.ep
@@ -488,6 +515,9 @@ __DATA__
     <li><a href="<%= url_for 'index' %>">Home</a></li>
     <li><a href="<%= url_for 'archive' %>">Archive</a></li>
     <li><a href="<%= url_for 'tags' %>">Tags</a></li>
+%   if (config('feed_link')) {
+        <li><a href="<%= url_for 'feed', format => 'xml' =%>">Feed</a></li>
+%   }
 % foreach my $page (@{booty->pages}) {
     <li><a href="<%= url_for 'page', page_url => $page->url %>">
         <%= $page->meta->{title} =%>
@@ -533,6 +563,7 @@ body { font-family: Helvetica, sans-serif; line-height: 145%; color: #ddd;
 #articles .teaser { font-weight: normal }
 ul.articles { font-size: .8em; line-height: 145% }
 ul.articles .tags a { text-decoration: none; font-weight: bold }
+.comment { background-color: gray; padding: 0.5em 1em; margin: 1em 3em;}
 #tags { margin: 3em 0 0; line-height: 200% }
 #tags a { font-weight: bold; text-decoration: none; padding: 0 .5ex }
 #tags a:hover { color: white }
