@@ -88,7 +88,7 @@ foreach my $tag (qw(foo bar baz)) {
 }
 
 # menu with pages
-$t->text_is('#menu a[href$=/pages/foo_bar_baz]', 'Test that shit, yo!');
+$t->text_like('#menu a[href$=/pages/foo_bar_baz]', qr/Test that shit, yo!/);
 
 # foo_bar_baz page
 $t->get_ok('/pages/foo_bar_baz')->status_is(200);
