@@ -10,7 +10,7 @@ sub add {
     my ($self, $name, $conf) = @_;
 
     # try to load
-    camelize $name;
+    $name = camelize $name;
     my $module  = "Bootylite::Plugin::$name";
     my $error   = Mojo::Loader->load($module);
     die $error->to_string           if ref $error;
