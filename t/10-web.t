@@ -34,8 +34,8 @@ is(
 $t->text_is('.article:nth-child(2) .teaser p', 'Hello ');
 $t->text_is('.article:nth-child(3) .teaser p', '€');
 $t->text_is('.article:nth-child(4) .teaser p', '€');
-$t->text_is('#pager a', 'Earlier');
-$t->element_exists('#pager a[href$=/page/2]');
+$t->text_is('.pager a', 'Earlier');
+$t->element_exists('.pager a[href$=/page/2]');
 
 # second page
 $t->get_ok('/page/2')->status_is(200);
@@ -82,18 +82,18 @@ is(scalar(@$articles), 3, 'found 3 articles');
 # tag cloud
 $t->get_ok('/tags')->status_is(200);
 $t->text_is('title', 'Bootylite - All tags')->text_is('h1', 'All tags');
-$t->element_exists('#tags');
+$t->element_exists('.tags');
 foreach my $tag (qw(foo bar baz)) {
-    $t->text_is("#tags a[href\$=/tag/$tag]", $tag);
+    $t->text_is(".tags a[href\$=/tag/$tag]", $tag);
 }
 
 # menu with pages
-$t->text_like('#menu a[href$=/pages/foo_bar_baz]', qr/Test that shit, yo!/);
+$t->text_like('.nav a[href$=/pages/foo_bar_baz]', qr/Test that shit, yo!/);
 
 # foo_bar_baz page
 $t->get_ok('/pages/foo_bar_baz')->status_is(200);
 $t->text_is('title', 'Bootylite - Test that shit, yo!');
-$t->text_is('h1', 'Test that shit, yo!')->text_is('#page em', 'page');
+$t->text_is('h1', 'Test that shit, yo!')->text_is('.page-content em', 'page');
 
 # second draft
 $t->get_ok('/drafts/draft2')->status_is(200);

@@ -269,7 +269,7 @@ __DATA__
 <h1>Home</h1>
 %= include 'list_articles', single => 0
 % if ($has_next_page) {
-<p id="pager"><a href="<%= url_for 'paged', page => 2 %>">Earlier</a></p>
+<p class="pager"><%= link_to paged => {page => 2} => (class => 'btn small') => begin %>Earlier<% end %></p>
 % }
 
 @@ paged.html.ep
@@ -277,15 +277,12 @@ __DATA__
 % title config('name') . ' - Page ' . $page;
 <h1>Page <%= $page %></h1>
 %= include 'list_articles', single => 0
-<p id="pager">
+<p class="pager">
 % if (defined $prev_page) {
-    <a href="<%= url_for 'paged', page => $prev_page %>">Later</a>
-% }
-% if (defined $prev_page and defined $next_page) {
-    &ndash;
+    <%= link_to paged => {page => $prev_page} => (class => 'btn small') => begin %>Later<% end %>
 % }
 % if (defined $next_page) {
-    <a href="<%= url_for 'paged', page => $next_page %>">Earlier</a>
+    <%= link_to paged => {page => $next_page} => (class => 'btn small') => begin %>Earlier<% end %>
 % }
 </p>
 
@@ -324,7 +321,7 @@ __DATA__
 % layout 'bootyblack';
 % title config('name') . ' - All tags';
 <h1>All tags</h1>
-<div id="tags">
+<div class="tags pills">
 % use List::Util qw(min max);
 % my $min_size  = config 'tag_cloud_min';
 % my $max_size  = config 'tag_cloud_max';
@@ -336,17 +333,17 @@ __DATA__
 %   my $size    = $min_size + $ratio * ($max_size - $min_size);
 %   my $sstr    = sprintf '%.2f', $size;
 %   my $url     = url_for 'tag', tag => $tag;
-    <a href="<%= $url %>" style="font-size: <%= $sstr %>em"><%= $tag %></a>
+    <%= link_to $url => (style => 'font-size: ' . $sstr . 'em') => begin %><%= $tag %><% end %>
 % }
-</div>
+</div><!-- tags -->
 
 @@ page.html.ep
 % layout 'bootyblack';
 % title config('name') . ' - ' . $page->meta->{title};
-<div id="page">
+<div class="page">
     <h1><%= $page->meta->{title} %></h1>
-    <div id="content"><%== content2html $page %></div>
-</div>
+    <div class="page-content"><%== content2html $page %></div>
+</div><!-- page -->
 
 @@ draft.html.ep
 % layout 'bootyblack';
@@ -386,9 +383,7 @@ __DATA__
 % foreach my $article (@$articles) {
 %   my $url = url_for 'article', article_url => $article->url;
     <li>
-        <strong><a href="<%= $url %>">
-            <%= $article->meta->{title} =%>
-        </a></strong><br>
+        <strong><%= link_to $article->meta->{title} => $url %></strong><br>
         <span class="meta">
             <span class="time"><%= date $article %></span>,
             <span class="tags">Tags:
@@ -409,7 +404,20 @@ __DATA__
 </div>
 
 @@ show_article.html.ep
-    <div class="article">
+    <div class="article row">
+    <div class="lefty span3">
+        <div class="big"><p><%== strftime '%b <b>%Y</b>', localtime $article->time %></p></div>
+%   if ($single) {
+        <p class="meta time"><%= date $article %></p>
+%       if ($article->prev) {
+            <p class="prev_article meta">Previous:<br><%= link_to article => {article_url => $article->prev->url} => begin %><%= $article->prev->meta->{title} %><% end %></p>
+%       }
+%       if ($article->next) {
+            <p class="next_article meta">Next:<br><%= link_to article => {article_url => $article->next->url} => begin %><%= $article->next->meta->{title} %><% end %></p>
+%       }
+%   }
+    </div>
+    <div class="article-content span12">
 %   if ($single) {
         <h1><%= $article->meta->{title} %></h1>
 %   } else {
@@ -417,26 +425,16 @@ __DATA__
                 <%= $article->meta->{title} =%>
         </a></h2>
 %   }
-        <div class="meta">
+        <p class="meta">
+%   unless ($single) {
             <span class="time"><%= date $article %></span>,
+%   }
             <span class="tags">Tags:
 %       foreach my $tag (@{$article->meta->{tags} // []}) {
                 <a href="<%= url_for 'tag', tag => $tag %>"><%= $tag %></a>
 %       }
             </span>
-%   if ($single) {
-%       if ($article->prev) {
-            <br><span class="prev_article">Previous: <a href="
-                <%= url_for 'article', article_url => $article->prev->url =%>
-            "><%= $article->prev->meta->{title} %></a></span>
-%       }
-%       if ($article->next) {
-            <br><span class="next_article">Next: <a href="
-                <%= url_for 'article', article_url => $article->next->url =%>
-            "><%= $article->next->meta->{title} %></a></span>
-%       }
-%   }
-        </div>
+        </p>
 %   if ($single) {
 %       if ($article->second) {
         <div class="teaser"><%== first2html $article %></div>
@@ -452,107 +450,74 @@ __DATA__
         </a></p>
 %       }
 %   }
-    </div>
+    </div><!-- article-content -->
+    </div><!-- article -->
 
 @@ not_found.html.ep
 % layout 'bootyblack';
 % title config('name') . ' - NOT FOUND!';
 <h1>Whoops!</h1>
-<p>I couldn't find what you were looking for. Sorry!</p>
+<p class="alert-message">I couldn't find what you were looking for. Sorry!</p>
 
 @@ layouts/bootyblack.html.ep
 <!doctype html>
 <html>
 <head>
 <title><%= title %></title>
-<link rel="stylesheet" type="text/css" media="screen" href="
-    <%= url_for 'screen_style', format => 'css' =%>
-">
-<link rel="stylesheet" type="text/css" media="print" href="
-    <%= url_for 'print_style', format => 'css' =%>
-">
-<link rel="alternate" type="application/atom+xml" title="ATOM feed" href="
-    <%= url_for 'feed', format => 'xml' =%>
-">
-% { no strict 'vars'; if (defined $tag_feed_url) {
-<link rel="alternate" type="application/atom+xml" title="ATOM tag feed" href="
-    <%= $tag_feed_url =%>
-">
-% } }
+<link rel="stylesheet" type="text/css" href="http://twitter.github.com/bootstrap/1.4.0/bootstrap.min.css">
+<link rel="alternate" type="application/atom+xml" title="ATOM feed" href="<%= url_for 'feed', format => 'xml' %>">
+% if (defined stash 'tag_feed_url') {
+<link rel="alternate" type="application/atom+xml" title="ATOM tag feed" href="<%= stash 'tag_feed_url' %>">
+% }
+<style type="text/css">
+html, body { background-color: #eee }
+body { padding-top: 80px }
+.topbar .container { padding-top: 40px }
+.topbar .brand { margin-left: 10px }
+.content { background-color: white; padding: 30px }
+.tags { margin-top: 100px; text-align: center }
+.pager { margin-top: 2.5em; text-align: center }
+.footer { margin: 40px 0 80px; text-align: center }
+.footer img { margin-top: 20px }
+.article .lefty .big {
+    color           : white;
+    background      : black url('/mojolicious-pinstripe.gif') repeat;
+    border-radius   : 5px;
+    margin          : 5px 0 20px;
+    padding         : 30px 0 20px;
+}
+.article .lefty .big p {
+    font-size       : 24px;
+    text-align      : center;
+    text-shadow     : 0 0 30px white, 0 0 5px #999;
+}
+.article .meta { color: #999 }
+</style>
 </head>
 <body>
-<div id="header"><a href="<%= url_for 'index' %>">
-    <%= config 'name' =%>
-</a></div>
-<ul id="menu">
-    <li><a href="<%= url_for 'index' %>">Home</a></li>
-    <li><a href="<%= url_for 'archive' %>">Archive</a></li>
-    <li><a href="<%= url_for 'tags' %>">Tags</a></li>
+<div class="topbar">
+    <div class="fill">
+        <div class="container">
+            <%= link_to index => (class => 'brand') => begin %><%= config 'name' %><% end %>
+            <ul class="nav">
+                <li><%= link_to Home    => 'index' %></li>
+                <li><%= link_to Archive => 'archive' %></li>
+                <li><%= link_to Tags    => 'tags' %></li>
 % foreach my $page (@{booty->pages}) {
-    <li><a href="<%= url_for 'page', page_url => $page->url %>">
-        <%= $page->meta->{title} =%>
-    </a></li>
+                <li><%= link_to page => {page_url => $page->url} => begin %><%= $page->meta->{title} %><% end %></li>
 % }
-</ul>
-<div id="main">
+            </ul>
+        </div>
+    </div>
+</div><!-- topbar -->
+<div class="container">
+<div class="content">
 %= content
-</div>
-<address>
+</div><!-- content -->
+<div class="footer">
     &copy; <%= strftime '%Y', localtime %> <%= config 'author' %><br>
-    <span id="footer">
-        Powered by <a href="http://github.com/memowe/bootylite">Bootylite</a>
-        on <a href="http://mojolicio.us/">Mojolicious::Lite</a>
-        on <a href="http://perl.org/">Perl</a>
-    </span>
-</address>
+    <a href="http://mojolicio.us/"><img src="/mojolicious-black.png" alt="Mojolicious"></a>
+</div><!-- footer -->
+</div><!-- container -->
 </body>
 </html>
-
-@@ screen_style.css.ep
-% my $left = '25%';
-html, body { margin: 0; padding: 0 }
-body { font-family: Helvetica, sans-serif; line-height: 145%; color: #ddd;
-    background: black url('/mojolicious-pinstripe.gif') repeat }
-#header { margin: 100px 0 50px <%= $left %>;}
-#header a { color: white; text-decoration: none; font-size: 2em;
-    letter-spacing: 2ex; text-shadow: 0 0 30px white }
-#menu { display: block; margin: 0 0 10px <%= $left %>; padding: 0 }
-#menu li { display: inline; margin: 0 15px 0 5px; padding: 0; list-style: none }
-#menu a { text-decoration: none; color: #888; letter-spacing: .5ex }
-#menu a:hover { color: white; text-shadow: 0 0 15px white }
-#main { margin: 0 0 0 <%= $left %>; padding: 30px 50px 50px 50px;
-    background-color: #333;
-    border: solid #111; border-width: 2px 0 0 2px }
-#main a { color: inherit }
-#main h1 { font-size: 1.5em; font-weight: normal; background-color: #222;
-    margin: 0 0 1em; padding: .5em .8em .4em; letter-spacing: .3ex }
-#main h2 { font-size: 1.2em; font-weight: bold; border-bottom: 1px solid #999;
-    margin: 1.5em 0 1em; padding: 0 0 .3em; letter-spacing: -.05ex }
-#main h2 a { text-decoration: none; color: white }
-.article .meta { font-size: .8em; line-height: 120% }
-.article .tags a { text-decoration: none; font-weight: bold }
-.article .tags a:hover { text-decoration: underline }
-.article .teaser, .article #content, #page #content { max-width: 80ex }
-.article .teaser { font-weight: bold }
-#articles .teaser { font-weight: normal }
-ul.articles { font-size: .8em; line-height: 145% }
-ul.articles .tags a { text-decoration: none; font-weight: bold }
-#tags { margin: 3em 0 0; line-height: 200% }
-#tags a { font-weight: bold; text-decoration: none; padding: 0 .5ex }
-#tags a:hover { color: white }
-#pager { font-size: .8em; margin: 2em 0 0; background-color: #222;
-    padding: .2em .5em .1em }
-address { margin: 0 0 10px <%= $left %>; padding: 30px 50px; text-align: right;
-    background-color: #444; border: solid #111; border-width: 0 0 2px 2px;
-    font-size:.8em; letter-spacing:.2ex; font-style: normal; line-height: 130% }
-address a { color: inherit }
-#footer { color: #888 }
-pre { background-color: #222; padding: .5em 2ex; line-height: 130%;
-    overflow: auto; max-width: 100ex }
-
-@@ print_style.css.ep
-html, body { margin: 0; padding: 0; color: black; background-color: white }
-body { font-family: serif; line-height: 120% }
-#header, #menu, #footer { display: none }
-#main, address { border: none }
-a { text-decoration: none; color: black }
