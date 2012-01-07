@@ -39,7 +39,7 @@ You can find a simple (but useless) plugin in the test suite. Plugin
 configuration lives in the `bootylite.conf` config file:
 
     plugins => {
-        comments => {
+        Comments => {
             comments_dir => app->home->rel_dir('comments'),
             encoding     => 'utf-8',
         },
