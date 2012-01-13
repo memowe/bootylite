@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use utf8;
 
-use Test::More tests => 98;
+use Test::More tests => 113;
 use Test::Mojo;
 
 use FindBin '$Bin';
@@ -18,6 +18,9 @@ my $t = Test::Mojo->new;
 # home page
 $t->get_ok('/')->status_is(200);
 $t->text_is('title' => 'Bootylite')->text_is('h1', 'Home');
+my $about = $t->tx->res->dom->find('ul.nav li a')->[3];
+is($about->attrs->{href}, 'pages/foo_bar_baz', 'right about link');
+is($about->text, 'Test that shit, yo!', 'right about link text');
 $t->element_exists('div#articles');
 my @articles = reverse @{$t->app->booty->articles};
 foreach my $i (0 .. 3) {
@@ -35,17 +38,23 @@ $t->text_is('.article:nth-child(2) .teaser p', 'Hello ');
 $t->text_is('.article:nth-child(3) .teaser p', '€');
 $t->text_is('.article:nth-child(4) .teaser p', '€');
 $t->text_is('.pager a', 'Earlier');
-$t->element_exists('.pager a[href$=/page/2]');
+$t->element_exists('.pager a[href$=page/2]');
 
 # second page
 $t->get_ok('/page/2')->status_is(200);
 $t->text_is('title', 'Bootylite - Page 2')->text_is('h1', 'Page 2');
+$about = $t->tx->res->dom->find('ul.nav li a')->[3];
+is($about->attrs->{href}, '../pages/foo_bar_baz', 'right about link');
+is($about->text, 'Test that shit, yo!', 'right about link text');
 $t->element_exists('div#articles');
 foreach my $i (4 .. 5) {
     my $url     = $articles[$i]->url;
     my $title   = $articles[$i]->meta->{title};
     my $n       = $i - 3;
-    $t->text_like(".article:nth-child($n) a[href\$=articles/$url]", qr/$title/);
+    $t->text_like(
+        ".article:nth-child($n) a[href\$=../articles/$url]",
+        qr/$title/
+    );
 }
 $t->text_is('.article:nth-child(1) .teaser p', '€');
 $t->text_is('.article:nth-child(2) .teaser', '');
@@ -54,6 +63,9 @@ $t->text_is('.article:nth-child(2) .teaser', '');
 my $url = '/articles/' . $articles[0]->url;
 $t->get_ok($url)->status_is(200);
 $t->text_is('title', 'Bootylite - Test that shit, yo!');
+$about = $t->tx->res->dom->find('ul.nav li a')->[3];
+is($about->attrs->{href}, '../pages/foo_bar_baz', 'right about link');
+is($about->text, 'Test that shit, yo!', 'right about link text');
 $t->text_is('h1', 'Test that shit, yo!');
 $t->element_exists('.teaser')->element_exists('#content');
 
@@ -61,13 +73,16 @@ $t->element_exists('.teaser')->element_exists('#content');
 $t->get_ok('/articles')->status_is(200);
 $t->text_is('title', 'Bootylite - Archive')->text_is('h1', 'Archive');
 $t->text_is('h2', '2011')->text_is('ul.months > li > strong', 'April');
+$about = $t->tx->res->dom->find('ul.nav li a')->[3];
+is($about->attrs->{href}, 'pages/foo_bar_baz', 'right about link');
+is($about->text, 'Test that shit, yo!', 'right about link text');
 @articles = reverse @articles;
 foreach my $i (0 .. 5) {
     my $url     = $articles[$i]->url;
     my $title   = $articles[$i]->meta->{title};
     my $n       = $i + 1;
     $t->text_like(
-        "ul.articles li:nth-child($n) a[href\$=/articles/$url]",
+        "ul.articles li:nth-child($n) a[href\$=articles/$url]",
         qr/$title/,
     );
 }
@@ -75,6 +90,9 @@ foreach my $i (0 .. 5) {
 # tag search
 $t->get_ok('/tag/foo')->status_is(200);
 $t->text_is('title', 'Bootylite - Tag foo')->text_is('h1', 'Tag foo');
+$about = $t->tx->res->dom->find('ul.nav li a')->[3];
+is($about->attrs->{href}, '../pages/foo_bar_baz', 'right about link');
+is($about->text, 'Test that shit, yo!', 'right about link text');
 $t->element_exists('#articles');
 my $articles = $t->tx->res->dom->at('#articles')->children;
 is(scalar(@$articles), 3, 'found 3 articles');
@@ -82,22 +100,28 @@ is(scalar(@$articles), 3, 'found 3 articles');
 # tag cloud
 $t->get_ok('/tags')->status_is(200);
 $t->text_is('title', 'Bootylite - All tags')->text_is('h1', 'All tags');
+$about = $t->tx->res->dom->find('ul.nav li a')->[3];
+is($about->attrs->{href}, 'pages/foo_bar_baz', 'right about link');
+is($about->text, 'Test that shit, yo!', 'right about link text');
 $t->element_exists('.tags');
 foreach my $tag (qw(foo bar baz)) {
-    $t->text_is(".tags a[href\$=/tag/$tag]", $tag);
+    $t->text_is(".tags a[href\$=tag/$tag]", $tag);
 }
-
-# menu with pages
-$t->text_like('.nav a[href$=/pages/foo_bar_baz]', qr/Test that shit, yo!/);
 
 # foo_bar_baz page
 $t->get_ok('/pages/foo_bar_baz')->status_is(200);
 $t->text_is('title', 'Bootylite - Test that shit, yo!');
+$about = $t->tx->res->dom->find('ul.nav li a')->[3];
+is($about->attrs->{href}, 'foo_bar_baz', 'right about link');
+is($about->text, 'Test that shit, yo!', 'right about link text');
 $t->text_is('h1', 'Test that shit, yo!')->text_is('.page-content em', 'page');
 
 # second draft
 $t->get_ok('/drafts/draft2')->status_is(200);
 $t->text_is('title', 'Bootylite - Test Draft Two');
+$about = $t->tx->res->dom->find('ul.nav li a')->[3];
+is($about->attrs->{href}, '../pages/foo_bar_baz', 'right about link');
+is($about->text, 'Test that shit, yo!', 'right about link text');
 $t->text_is('h1', 'Test Draft Two');
 $t->text_is('#content p', 'second draft');
 

@@ -46,6 +46,24 @@ app->helper(feed_date => sub {
     shift->strftime('%Y-%m-%dT%H:%M:%SZ', gmtime shift->time)
 });
 
+# relative urls with url_for
+# as in Mojolicious::Plugin::RelativeUrlFor
+my $url_for = *Mojolicious::Controller::url_for{CODE};
+{ no strict 'refs'; no warnings 'redefine';
+    *Mojolicious::Controller::url_for = sub {
+        my $c = shift;
+
+        # create urls
+        my $url     = $url_for->($c, @_);
+        my $req_url = $c->req->url;
+
+        # return relative version if request url exists
+        # or change nothing
+        return $url->to_rel($req_url) if $req_url->to_string;
+        return $url;
+    };
+}
+
 # register plugins
 my $plugins = Bootylite::Plugins->new;
 if ($config->{plugins} and ref $config->{plugins} eq 'HASH') {
