@@ -58,8 +58,15 @@ my $url_for = *Mojolicious::Controller::url_for{CODE};
         my $req_url = $c->req->url;
 
         # return relative version if request url exists
+        if ($req_url->to_string) {
+
+            # "repair" if empty
+            my $rel_url = $url->to_rel($req_url);
+            return Mojo::URL->new('./') unless $rel_url->to_string;
+            return $rel_url;
+        }
+
         # or change nothing
-        return $url->to_rel($req_url) if $req_url->to_string;
         return $url;
     };
 }
@@ -339,7 +346,7 @@ __DATA__
 % layout 'bootyblack';
 % title config('name') . ' - All tags';
 <h1>All tags</h1>
-<div class="tags pills">
+<div id="tags">
 % use List::Util qw(min max);
 % my $min_size  = config 'tag_cloud_min';
 % my $max_size  = config 'tag_cloud_max';
@@ -401,7 +408,9 @@ __DATA__
 % foreach my $article (@$articles) {
 %   my $url = url_for 'article', article_url => $article->url;
     <li>
-        <strong><%= link_to $article->meta->{title} => $url %></strong><br>
+        <strong>
+            <a href="<%= $url %>"><%= $article->meta->{title} %></a>
+        </strong><br>
         <span class="meta">
             <span class="time"><%= date $article %></span>,
             <span class="tags">Tags:
@@ -422,43 +431,29 @@ __DATA__
 </div>
 
 @@ show_article.html.ep
-    <div class="article row">
-    <div class="lefty span3">
-        <div class="big"><p><%== strftime '%b <b>%Y</b>', localtime $article->time %></p></div>
+<div class="article">
 %   if ($single) {
-        <p class="meta time"><%= date $article %></p>
-%       if ($article->prev) {
-            <p class="prev_article meta">Previous:<br><%= link_to article => {article_url => $article->prev->url} => begin %><%= $article->prev->meta->{title} %><% end %></p>
-%       }
-%       if ($article->next) {
-            <p class="next_article meta">Next:<br><%= link_to article => {article_url => $article->next->url} => begin %><%= $article->next->meta->{title} %><% end %></p>
-%       }
-%   }
-    </div>
-    <div class="article-content span12">
-%   if ($single) {
-        <h1><%= $article->meta->{title} %></h1>
+    <h1><%= $article->meta->{title} %></h1>
 %   } else {
-        <h2><a href="<%= url_for 'article', article_url => $article->url %>">
-                <%= $article->meta->{title} =%>
-        </a></h2>
+    <h2><a href="<%= url_for 'article', article_url => $article->url %>">
+            <%= $article->meta->{title} =%>
+    </a></h2>
 %   }
-        <p class="meta">
-%   unless ($single) {
-            <span class="time"><%= date $article %></span>,
+    <p class="meta">
+        <span class="time"><%= date $article %></span>,
+        <span class="tags">Tags:
+%   foreach my $tag (@{$article->meta->{tags} // []}) {
+            <a href="<%= url_for 'tag', tag => $tag %>"><%= $tag %></a>
 %   }
-            <span class="tags">Tags:
-%       foreach my $tag (@{$article->meta->{tags} // []}) {
-                <a href="<%= url_for 'tag', tag => $tag %>"><%= $tag %></a>
-%       }
-            </span>
-        </p>
+        </span>
+    </p>
+    <div class="article-content">
 %   if ($single) {
 %       if ($article->second) {
         <div class="teaser"><%== first2html $article %></div>
-        <div id="content"><%== second2html $article %></div>
+        <div class="content"><%== second2html $article %></div>
 %       } else {
-        <div id="content"><%== first2html $article %></div>
+        <div class="content"><%== first2html $article %></div>
 %       }
 %   } else {
         <div class="teaser"><%== first2html $article %></div>
@@ -469,73 +464,58 @@ __DATA__
 %       }
 %   }
     </div><!-- article-content -->
-    </div><!-- article -->
+%   if ($single) {
+        <div class="pager">
+%       if ($article->prev) {
+            <p class="prev_article meta">Previous: <%= link_to article => {article_url => $article->prev->url} => begin %><%= $article->prev->meta->{title} %><% end %></p>
+%       }
+%       if ($article->next) {
+            <p class="next_article meta">Next: <%= link_to article => {article_url => $article->next->url} => begin %><%= $article->next->meta->{title} %><% end %></p>
+%       }
+        </div>
+%   }
+
+</div><!-- article -->
 
 @@ not_found.html.ep
 % layout 'bootyblack';
 % title config('name') . ' - NOT FOUND!';
 <h1>Whoops!</h1>
-<p class="alert-message">I couldn't find what you were looking for. Sorry!</p>
+<p>I couldn't find what you were looking for. Sorry!</p>
 
 @@ layouts/bootyblack.html.ep
 <!doctype html>
 <html>
 <head>
 <title><%= title %></title>
-<link rel="stylesheet" type="text/css" href="http://twitter.github.com/bootstrap/1.4.0/bootstrap.min.css">
+<%= stylesheet '/styles.css' %>
 <link rel="alternate" type="application/atom+xml" title="ATOM feed" href="<%= url_for 'feed', format => 'xml' %>">
 % if (defined stash 'tag_feed_url') {
 <link rel="alternate" type="application/atom+xml" title="ATOM tag feed" href="<%= stash 'tag_feed_url' %>">
 % }
-<style type="text/css">
-html, body { background-color: #eee }
-body { padding-top: 80px }
-.topbar .container { padding-top: 40px }
-.topbar .brand { margin-left: 10px }
-.content { background-color: white; padding: 30px }
-.tags { margin-top: 100px; text-align: center }
-.pager { margin-top: 2.5em; text-align: center }
-.footer { margin: 40px 0 80px; text-align: center }
-.footer img { margin-top: 20px }
-.article .lefty .big {
-    color           : white;
-    background      : black url('/mojolicious-pinstripe.gif') repeat;
-    border-radius   : 5px;
-    margin          : 5px 0 20px;
-    padding         : 30px 0 20px;
-}
-.article .lefty .big p {
-    font-size       : 24px;
-    text-align      : center;
-    text-shadow     : 0 0 30px white, 0 0 5px #999;
-}
-.article .meta { color: #999 }
-</style>
 </head>
 <body>
-<div class="topbar">
-    <div class="fill">
-        <div class="container">
-            <%= link_to index => (class => 'brand') => begin %><%= config 'name' %><% end %>
-            <ul class="nav">
-                <li><%= link_to Home    => 'index' %></li>
-                <li><%= link_to Archive => 'archive' %></li>
-                <li><%= link_to Tags    => 'tags' %></li>
+<div id="top">
+    <div id="inner">
+        <p id="name">
+            <%= link_to config('name') => 'index' %>
+        </p>
+        <ul id="navi">
+            <li><%= link_to Home    => 'index' %></li>
+            <li><%= link_to Archive => 'archive' %></li>
+            <li><%= link_to Tags    => 'tags' %></li>
 % foreach my $page (@{booty->pages}) {
-                <li><%= link_to page => {page_url => $page->url} => begin %><%= $page->meta->{title} %><% end %></li>
+%   my $url = url_for 'page', page_url => $page->url;
+            <li><a href="<%= $url %>"><%= $page->meta->{title} %></a></li>
 % }
-            </ul>
-        </div>
-    </div>
-</div><!-- topbar -->
-<div class="container">
-<div class="content">
+        </ul>
+    </div><!-- inner -->
+</div><!-- top -->
+<div id="content">
 %= content
 </div><!-- content -->
-<div class="footer">
-    &copy; <%= strftime '%Y', localtime %> <%= config 'author' %><br>
-    <a href="http://mojolicio.us/"><img src="/mojolicious-black.png" alt="Mojolicious"></a>
+<div id="footer">
+    <p>&copy; <%= strftime '%Y', localtime %> <%= config 'author' %></p>
 </div><!-- footer -->
-</div><!-- container -->
 </body>
 </html>

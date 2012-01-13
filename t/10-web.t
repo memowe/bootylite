@@ -18,7 +18,7 @@ my $t = Test::Mojo->new;
 # home page
 $t->get_ok('/')->status_is(200);
 $t->text_is('title' => 'Bootylite')->text_is('h1', 'Home');
-my $about = $t->tx->res->dom->find('ul.nav li a')->[3];
+my $about = $t->tx->res->dom->find('ul#navi a')->[3];
 is($about->attrs->{href}, 'pages/foo_bar_baz', 'right about link');
 is($about->text, 'Test that shit, yo!', 'right about link text');
 $t->element_exists('div#articles');
@@ -43,7 +43,7 @@ $t->element_exists('.pager a[href$=page/2]');
 # second page
 $t->get_ok('/page/2')->status_is(200);
 $t->text_is('title', 'Bootylite - Page 2')->text_is('h1', 'Page 2');
-$about = $t->tx->res->dom->find('ul.nav li a')->[3];
+$about = $t->tx->res->dom->find('ul#navi a')->[3];
 is($about->attrs->{href}, '../pages/foo_bar_baz', 'right about link');
 is($about->text, 'Test that shit, yo!', 'right about link text');
 $t->element_exists('div#articles');
@@ -63,7 +63,7 @@ $t->text_is('.article:nth-child(2) .teaser', '');
 my $url = '/articles/' . $articles[0]->url;
 $t->get_ok($url)->status_is(200);
 $t->text_is('title', 'Bootylite - Test that shit, yo!');
-$about = $t->tx->res->dom->find('ul.nav li a')->[3];
+$about = $t->tx->res->dom->find('ul#navi a')->[3];
 is($about->attrs->{href}, '../pages/foo_bar_baz', 'right about link');
 is($about->text, 'Test that shit, yo!', 'right about link text');
 $t->text_is('h1', 'Test that shit, yo!');
@@ -73,7 +73,7 @@ $t->element_exists('.teaser')->element_exists('#content');
 $t->get_ok('/articles')->status_is(200);
 $t->text_is('title', 'Bootylite - Archive')->text_is('h1', 'Archive');
 $t->text_is('h2', '2011')->text_is('ul.months > li > strong', 'April');
-$about = $t->tx->res->dom->find('ul.nav li a')->[3];
+$about = $t->tx->res->dom->find('ul#navi a')->[3];
 is($about->attrs->{href}, 'pages/foo_bar_baz', 'right about link');
 is($about->text, 'Test that shit, yo!', 'right about link text');
 @articles = reverse @articles;
@@ -90,7 +90,7 @@ foreach my $i (0 .. 5) {
 # tag search
 $t->get_ok('/tag/foo')->status_is(200);
 $t->text_is('title', 'Bootylite - Tag foo')->text_is('h1', 'Tag foo');
-$about = $t->tx->res->dom->find('ul.nav li a')->[3];
+$about = $t->tx->res->dom->find('ul#navi a')->[3];
 is($about->attrs->{href}, '../pages/foo_bar_baz', 'right about link');
 is($about->text, 'Test that shit, yo!', 'right about link text');
 $t->element_exists('#articles');
@@ -100,18 +100,18 @@ is(scalar(@$articles), 3, 'found 3 articles');
 # tag cloud
 $t->get_ok('/tags')->status_is(200);
 $t->text_is('title', 'Bootylite - All tags')->text_is('h1', 'All tags');
-$about = $t->tx->res->dom->find('ul.nav li a')->[3];
+$about = $t->tx->res->dom->find('ul#navi a')->[3];
 is($about->attrs->{href}, 'pages/foo_bar_baz', 'right about link');
 is($about->text, 'Test that shit, yo!', 'right about link text');
-$t->element_exists('.tags');
+$t->element_exists('#tags');
 foreach my $tag (qw(foo bar baz)) {
-    $t->text_is(".tags a[href\$=tag/$tag]", $tag);
+    $t->text_is("#tags a[href\$=tag/$tag]", $tag);
 }
 
 # foo_bar_baz page
 $t->get_ok('/pages/foo_bar_baz')->status_is(200);
 $t->text_is('title', 'Bootylite - Test that shit, yo!');
-$about = $t->tx->res->dom->find('ul.nav li a')->[3];
+$about = $t->tx->res->dom->find('ul#navi a')->[3];
 is($about->attrs->{href}, 'foo_bar_baz', 'right about link');
 is($about->text, 'Test that shit, yo!', 'right about link text');
 $t->text_is('h1', 'Test that shit, yo!')->text_is('.page-content em', 'page');
@@ -119,11 +119,11 @@ $t->text_is('h1', 'Test that shit, yo!')->text_is('.page-content em', 'page');
 # second draft
 $t->get_ok('/drafts/draft2')->status_is(200);
 $t->text_is('title', 'Bootylite - Test Draft Two');
-$about = $t->tx->res->dom->find('ul.nav li a')->[3];
+$about = $t->tx->res->dom->find('ul#navi a')->[3];
 is($about->attrs->{href}, '../pages/foo_bar_baz', 'right about link');
 is($about->text, 'Test that shit, yo!', 'right about link text');
 $t->text_is('h1', 'Test Draft Two');
-$t->text_is('#content p', 'second draft');
+$t->text_is('.article-content p', 'second draft');
 
 # atom feed
 @articles = @{$t->app->booty->articles};
