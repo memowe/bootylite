@@ -276,9 +276,9 @@ get $config->{refresh_url} => sub {
     $self->booty->refresh;
 
     # done.
-    $plugins->call_refresh($self);
     $self->res->headers->content_type('text/html');
     $self->render_text('Done');
+    $plugins->call_refresh($self);
 } => 'refresh';
 
 # pseudo static style sheets
