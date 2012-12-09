@@ -34,7 +34,7 @@ is(
     'foo teaser',
     'div.article:nth-child(1) .teaser p',
 );
-$t->text_is('.article:nth-child(2) .teaser p', 'Hello ');
+$t->text_is('.article:nth-child(2) .teaser p', 'Hello');
 $t->text_is('.article:nth-child(3) .teaser p', '€');
 $t->text_is('.article:nth-child(4) .teaser p', '€');
 $t->text_is('.pager a', 'Earlier');
