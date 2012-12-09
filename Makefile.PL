@@ -13,7 +13,7 @@ WriteMakefile(
     AUTHOR          => 'Mirko Westermeier <mail@memowe.de>',
     EXE_FILES       => ['bootylite.pl'],
     PREREQ_PM => {
-        'Mojolicious'           => '1.16',
+        'Mojolicious'           => '3.64',
         'Text::Markdown'        => '1.0',
         'Time::Local'           => '1.0',   # core
         'POSIX'                 => '1.0',   # core
