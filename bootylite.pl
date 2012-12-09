@@ -54,8 +54,8 @@ my $url_for = *Mojolicious::Controller::url_for{CODE};
         my $c = shift;
 
         # create urls
-        my $url     = $url_for->($c, @_);
-        my $req_url = $c->req->url;
+        my $url     = $url_for->($c, @_)->to_abs;
+        my $req_url = $c->req->url->to_abs;
 
         # return relative version if request url exists
         if ($req_url->to_string) {
