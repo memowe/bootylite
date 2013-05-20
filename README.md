@@ -50,6 +50,6 @@ configuration lives in the `bootylite.conf` config file:
 COPYRIGHT AND LICENCE
 ---------------------
 
-Copyright (c) 2011 Mirko Westermeier, mail@memowe.de
+Copyright (c) 2011-2013 Mirko Westermeier, mail@memowe.de
 
 See the file `MIT-LICENSE` in this distribution for details.

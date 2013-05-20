@@ -277,7 +277,7 @@ get $config->{refresh_url} => sub {
 
     # done.
     $self->res->headers->content_type('text/html');
-    $self->render_text('Done');
+    $self->render(text => 'Done');
     $plugins->call_refresh($self);
 } => 'refresh';
 
