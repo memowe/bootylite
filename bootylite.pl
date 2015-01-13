@@ -12,7 +12,7 @@ use List::Util qw(min max);
 my $config = plugin 'config';
 
 # set cookie secret
-app->secret($config->{secret} // 'Bootylite');
+app->secrets([$config->{secret} // 'Bootylite']);
 
 # use the right character encoding
 plugin charset => {charset => $config->{encoding}};
@@ -53,21 +53,7 @@ my $url_for = *Mojolicious::Controller::url_for{CODE};
     *Mojolicious::Controller::url_for = sub {
         my $c = shift;
 
-        # create urls
-        my $url     = $url_for->($c, @_)->to_abs;
-        my $req_url = $c->req->url->to_abs;
-
-        # return relative version if request url exists
-        if ($req_url->to_string) {
-
-            # "repair" if empty
-            my $rel_url = $url->to_rel($req_url);
-            return Mojo::URL->new('./') unless $rel_url->to_string;
-            return $rel_url;
-        }
-
-        # or change nothing
-        return $url;
+	return $url_for->($c, @_)->to_abs;
     };
 }
 
