@@ -3,7 +3,7 @@ package Bootylite;
 use Mojo::Base -base;
 use Bootylite::Page;
 use Bootylite::Article;
-use Mojo::Loader;
+use Mojo::Loader qw(find_modules load_class);
 use List::Util 'first';
 
 has articles_dir    => sub { die 'no articles directory given' };
@@ -84,16 +84,12 @@ sub _build_drafts {
 sub _build_renderers {
     my $self = shift;
 
-    # search for renderers
-    my $loader      = Mojo::Loader->new;
-    my $renderers   = $loader->search('Bootylite::Renderer');
-
-    # build renderers
+    # find and build renderers
     my %renderer;
-    foreach my $r (@$renderers) {
+    foreach my $r (find_modules 'Bootylite::Renderer') {
 
         # load
-        my $error = $loader->load($r);
+        my $error = load_class $r;
         die $error if $error;
 
         # really a renderer?

@@ -12,7 +12,7 @@ use List::Util qw(min max);
 my $config = plugin 'config';
 
 # set cookie secret
-app->secret($config->{secret} // 'Bootylite');
+app->secrets([$config->{secret} // 'Bootylite']);
 
 # use the right character encoding
 plugin charset => {charset => $config->{encoding}};
@@ -60,8 +60,31 @@ my $url_for = *Mojolicious::Controller::url_for{CODE};
         # return relative version if request url exists
         if ($req_url->to_string) {
 
+            # use old Mojo::URL::to_rel
+            my $rel_url = $url->clone;
+            if ($rel_url->is_abs) {
+
+                # Scheme and authority
+                my $base = $req_url || $rel_url->base;
+                $rel_url->base($base)->scheme(undef);
+                $rel_url->userinfo(undef)->host(undef)->port(undef)
+                    if $base->authority;
+
+                # Path
+                my @parts      = @{$rel_url->path->parts};
+                my $base_path  = $base->path;
+                my @base_parts = @{$base_path->parts};
+                pop @base_parts unless $base_path->trailing_slash;
+                while (@parts && @base_parts && $parts[0] eq $base_parts[0]) {
+                    shift @$_ for \@parts, \@base_parts;
+                }
+                my $path = $rel_url->path(Mojo::Path->new)->path;
+                $path->leading_slash(1) if $rel_url->authority;
+                $path->parts([('..') x @base_parts, @parts]);
+                $path->trailing_slash(1) if $url->path->trailing_slash;
+            }
+
             # "repair" if empty
-            my $rel_url = $url->to_rel($req_url);
             return Mojo::URL->new('./') unless $rel_url->to_string;
             return $rel_url;
         }
@@ -111,8 +134,7 @@ get '/page/:page' => [page => qr/[1-9]\d*/] => sub {
     # in range?
     my $perpage = $self->config->{articles_per_page};
     my $page    = $self->param('page');
-    $self->render_not_found and return
-        unless ($page - 1) * $perpage < @articles;
+    return $self->reply->not_found unless ($page - 1) * $perpage < @articles;
 
     # calculate
     my $start       = ($page - 1) * $perpage;
@@ -138,7 +160,7 @@ get '/articles/:article_url' => sub {
     # get that article
     my $url     = $self->param('article_url');
     my $article = $self->booty->get_article($url);
-    $self->render_not_found and return unless $article;
+    return $self->reply->not_found unless $article;
 
     # store
     $self->stash(article => $article);
@@ -183,7 +205,7 @@ get '/tag/:tag' => sub {
     # get articles
     my $tag         = $self->param('tag');
     my @articles    = reverse $self->booty->get_articles_by_tag($tag);
-    $self->render_not_found and return unless @articles;
+    return $self->reply->not_found unless @articles;
 
     # store
     $self->stash(
@@ -217,7 +239,7 @@ get '/pages/:page_url' => sub {
     # get that page
     my $url     = $self->param('page_url');
     my $page    = $self->booty->get_page($url);
-    $self->render_not_found and return unless $page;
+    return $self->reply->not_found unless $page;
 
     # store
     $self->stash(page => $page);
@@ -245,7 +267,7 @@ get '/feed/:tag' => sub {
     # get articles
     my $tag         = $self->param('tag');
     my @articles    = $self->booty->get_articles_by_tag($tag);
-    $self->render_not_found and return unless @articles;
+    return $self->reply->not_found unless @articles;
 
     # store
     $self->stash(articles => \@articles);
@@ -260,7 +282,7 @@ get $config->{drafts_url} . '/:draft_url' => sub {
     # get draft
     my $url     = $self->param('draft_url');
     my $draft   = $self->booty->get_draft($url);
-    $self->render_not_found and return unless $draft;
+    return $self->reply->not_found unless $draft;
 
     # store
     $self->stash(draft => $draft);

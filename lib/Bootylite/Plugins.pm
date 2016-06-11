@@ -2,7 +2,7 @@ package Bootylite::Plugins;
 
 use Mojo::Base -base;
 use Mojo::Util 'camelize';
-use Mojo::Loader;
+use Mojo::Loader 'load_class';
 
 has plugins => sub { [] };
 
@@ -12,7 +12,7 @@ sub add {
     # try to load
     $name = camelize $name;
     my $module  = "Bootylite::Plugin::$name";
-    my $error   = Mojo::Loader->load($module);
+    my $error   = load_class $module;
     die $error->to_string           if ref $error;
     die "plugin $name not found"    if $error;
 
