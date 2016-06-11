@@ -12,7 +12,7 @@ use List::Util qw(min max);
 my $config = plugin 'config';
 
 # set cookie secret
-app->secret($config->{secret} // 'Bootylite');
+app->secrets([$config->{secret} // 'Bootylite']);
 
 # use the right character encoding
 plugin charset => {charset => $config->{encoding}};
