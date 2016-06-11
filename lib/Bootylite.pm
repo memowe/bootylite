@@ -4,6 +4,7 @@ use Mojo::Base -base;
 use Bootylite::Page;
 use Bootylite::Article;
 use Mojo::Loader;
+use List::Util 'first';
 
 has articles_dir    => sub { die 'no articles directory given' };
 has pages_dir       => sub { die 'no pages directory given' };
@@ -178,7 +179,7 @@ sub get_articles_by_tag {
     my @matching;
     foreach my $article (@{$self->articles}) {
         my @tags = @{$article->meta->{tags}};
-        push @matching, $article if $tag ~~ @tags;
+        push @matching, $article if defined first {$_ eq $tag} @tags;
     }
 
     return @matching;
