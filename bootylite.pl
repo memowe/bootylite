@@ -60,8 +60,31 @@ my $url_for = *Mojolicious::Controller::url_for{CODE};
         # return relative version if request url exists
         if ($req_url->to_string) {
 
+            # use old Mojo::URL::to_rel
+            my $rel_url = $url->clone;
+            if ($rel_url->is_abs) {
+
+                # Scheme and authority
+                my $base = $req_url || $rel_url->base;
+                $rel_url->base($base)->scheme(undef);
+                $rel_url->userinfo(undef)->host(undef)->port(undef)
+                    if $base->authority;
+
+                # Path
+                my @parts      = @{$rel_url->path->parts};
+                my $base_path  = $base->path;
+                my @base_parts = @{$base_path->parts};
+                pop @base_parts unless $base_path->trailing_slash;
+                while (@parts && @base_parts && $parts[0] eq $base_parts[0]) {
+                    shift @$_ for \@parts, \@base_parts;
+                }
+                my $path = $rel_url->path(Mojo::Path->new)->path;
+                $path->leading_slash(1) if $rel_url->authority;
+                $path->parts([('..') x @base_parts, @parts]);
+                $path->trailing_slash(1) if $url->path->trailing_slash;
+            }
+
             # "repair" if empty
-            my $rel_url = $url->to_rel($req_url);
             return Mojo::URL->new('./') unless $rel_url->to_string;
             return $rel_url;
         }
