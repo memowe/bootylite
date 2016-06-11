@@ -134,8 +134,7 @@ get '/page/:page' => [page => qr/[1-9]\d*/] => sub {
     # in range?
     my $perpage = $self->config->{articles_per_page};
     my $page    = $self->param('page');
-    $self->render_not_found and return
-        unless ($page - 1) * $perpage < @articles;
+    return $self->reply->not_found unless ($page - 1) * $perpage < @articles;
 
     # calculate
     my $start       = ($page - 1) * $perpage;
@@ -161,7 +160,7 @@ get '/articles/:article_url' => sub {
     # get that article
     my $url     = $self->param('article_url');
     my $article = $self->booty->get_article($url);
-    $self->render_not_found and return unless $article;
+    return $self->reply->not_found unless $article;
 
     # store
     $self->stash(article => $article);
@@ -206,7 +205,7 @@ get '/tag/:tag' => sub {
     # get articles
     my $tag         = $self->param('tag');
     my @articles    = reverse $self->booty->get_articles_by_tag($tag);
-    $self->render_not_found and return unless @articles;
+    return $self->reply->not_found unless @articles;
 
     # store
     $self->stash(
@@ -240,7 +239,7 @@ get '/pages/:page_url' => sub {
     # get that page
     my $url     = $self->param('page_url');
     my $page    = $self->booty->get_page($url);
-    $self->render_not_found and return unless $page;
+    return $self->reply->not_found unless $page;
 
     # store
     $self->stash(page => $page);
@@ -268,7 +267,7 @@ get '/feed/:tag' => sub {
     # get articles
     my $tag         = $self->param('tag');
     my @articles    = $self->booty->get_articles_by_tag($tag);
-    $self->render_not_found and return unless @articles;
+    return $self->reply->not_found unless @articles;
 
     # store
     $self->stash(articles => \@articles);
@@ -283,7 +282,7 @@ get $config->{drafts_url} . '/:draft_url' => sub {
     # get draft
     my $url     = $self->param('draft_url');
     my $draft   = $self->booty->get_draft($url);
-    $self->render_not_found and return unless $draft;
+    return $self->reply->not_found unless $draft;
 
     # store
     $self->stash(draft => $draft);
